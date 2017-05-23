@@ -26,7 +26,7 @@ class LoginController extends Controller
         if (Auth::check())
         {
             // Si está autenticado lo mandamos a la raíz donde estara el mensaje de bienvenida.
-            return Redirect::to('/home');
+            return Redirect::to('/clientes');
         }
         // Mostramos la vista login.blade.php (Recordemos que .blade.php se omite.)
         return view('auth.login');
