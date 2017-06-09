@@ -14,7 +14,7 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     /**
@@ -24,7 +24,6 @@ class UserController extends Controller
      */
     public function getUsers(){
         $users = DB::table('users')->get();
-
         return $users;
     }
 }

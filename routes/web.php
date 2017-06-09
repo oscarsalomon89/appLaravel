@@ -15,9 +15,13 @@ Route::get('/', function () {
     return view('index');
 });
 
-Auth::routes();
+Route::get('/inicio', 'HomeController@index')->name('clientes');
+
+//Auth::routes();
+Route::post('/login','LoginController@login');
 Route::get('/logout','LoginController@logOut');
 Route::get('/clientes', 'HomeController@index')->name('clientes');
 
+Route::get('/login','HomeController@index');
 Route::get('/about','HomeController@index');
 Route::get('/api/users','UserController@getUsers');
