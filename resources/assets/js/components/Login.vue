@@ -122,6 +122,7 @@ display: block;
         var data = JSON.stringify(this.info);
         this.$http.post('/login', data)
         .then(function(res){
+              console.log(res.body);
               if(res.body.error){
                   context.error = res.body.msg;
               }else{

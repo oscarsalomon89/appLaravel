@@ -26246,7 +26246,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   methods: {
     login: function login() {
       var data = JSON.stringify(this.info);
-      this.$http.post('/login', data).then(function (res) {
+      this.$http.post('/login', [data]).then(function (res) {
+        console.log(res.body);
         if (res.body.error) {
           context.error = res.body.msg;
         } else {
