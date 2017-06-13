@@ -32,16 +32,16 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function login(){
+    public function login(Request $request){
         // Guardamos en un arreglo los datos del usuario.
         $userdata = array(
-            'user' => $request->input('user'),
+            'name' => $request->input('user'),
             'password'=> $request->input('password')
         );
         // Validamos los datos y además mandamos como un segundo parámetro la opción de recordar el usuario.
         if(Auth::attempt($userdata, $request->input('remember', 0))){
             // De ser datos válidos nos mandara a la bienvenida
-            return response()->json(['error'=> false, 'token'=> user.token]);
+            return response()->json(['error'=> false, 'token'=> $request->input('user')]);
         }
         // En caso de que la autenticación haya fallado manda un mensaje al formulario de login y también regresamos los valores enviados con withInput().
         return response()->json(['error'=> true, 'msg'=> 'Tus datos son incorrectos']);
