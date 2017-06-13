@@ -13,6 +13,7 @@
                       {{error}}
                     </div>
                 <form class="form-signin" v-on:submit.prevent>
+                 <input name="_token" type="hidden" value="0vguHTWLmfuut1Hq800tgb4cavv0mFPrSgnsPKqv" />
                 <input v-model="info.user" type="text" class="form-control" placeholder="Usuario" required autofocus>
                 <input v-model="info.password" type="password" class="form-control" placeholder="Password" required>
                 <button class="btn btn-lg btn-primary btn-block" v-on:click="login()">
@@ -111,6 +112,7 @@ display: block;
     data() {
       return {
         error: '',
+        token: document.getElementById('token').value,
         info: {
             user: '',
             password: ''
@@ -122,16 +124,17 @@ display: block;
         var data = JSON.stringify(this.info);
         this.$http.post('/login', data)
         .then(function(res){
-              console.log(res.body);
               if(res.body.error){
-                  context.error = res.body.msg;
+                  this.error = res.body.msg;
               }else{
                   var token = res.body.token;
                   localStorage.setItem('id_token',token);
                   this.auth = true;
                   this.$router.push('/inicio');
               }
-            })
+            }, function(response){
+            console.log(response.data);
+         })
       },
       logout() {
 

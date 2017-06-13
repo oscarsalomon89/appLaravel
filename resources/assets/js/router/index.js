@@ -14,6 +14,8 @@ import Clientes   from '../components/Clientes.vue'
 Vue.use(Router)
 Vue.use(VueResource)
 
+Vue.http.headers.common['X-CSRF-TOKEN'] = document.getElementById('token').value;
+
 export default new Router({
   mode: 'history',
   routes: [

@@ -17,9 +17,9 @@ Route::get('/', function () {
 
 Route::get('/inicio', 'HomeController@index')->name('clientes');
 
-Auth::routes();
-//Route::post('/login','Auth\LoginController@login');
-//Route::get('/logout','Auth\LoginController@logOut');
+//Auth::routes();
+Route::post('/login','Auth\LoginController@login');
+Route::get('/logout','Auth\LoginController@logOut');
 Route::get('/clientes', 'HomeController@index')->name('clientes');
 
 Route::get('/login','HomeController@index');
