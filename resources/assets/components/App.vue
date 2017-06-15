@@ -4,7 +4,7 @@
     </div>
 </template>
 <script>
-
+import auth from '../js/auth.js'
     export default {
         data() {
             return {
@@ -12,13 +12,8 @@
               messageFinal: ''
             }
           },
-        methods: {
-            logout () {
-                this.$http.get('/logout')
-                .then(function(res){
-
-                    })
-            }
+        mounted() {
+            auth.check()
         }
     }
 </script>

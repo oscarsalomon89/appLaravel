@@ -135,10 +135,7 @@ import auth from '../js/auth.js';
             }, function(response){
             console.log(response.data);
          })*/
-      },
-      logout() {
-
-          }
+      }
     }
   }
 </script>

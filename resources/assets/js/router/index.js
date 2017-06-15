@@ -14,7 +14,9 @@ import Clientes   from '../../components/Clientes.vue'
 Vue.use(Router)
 Vue.use(VueResource)
 
-Vue.http.headers.common['X-CSRF-TOKEN'] = document.getElementById('token').value;
+Vue.http.headers.common['X-CSRF-TOKEN'] = document.getElementsByName('csrf-token')[0].getAttribute('content');
+Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
+Vue.http.options.root = 'http://localhost:8000';
 
 export default new Router({
   mode: 'history',
