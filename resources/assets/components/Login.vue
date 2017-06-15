@@ -12,11 +12,10 @@
                       <span class="sr-only">Error:</span>
                       {{error}}
                     </div>
-                <form class="form-signin" v-on:submit.prevent>
-                 <input name="_token" type="hidden" value="0vguHTWLmfuut1Hq800tgb4cavv0mFPrSgnsPKqv" />
-                <input v-model="info.user" type="text" class="form-control" placeholder="Usuario" required autofocus>
-                <input v-model="info.password" type="password" class="form-control" placeholder="Password" required>
-                <button class="btn btn-lg btn-primary btn-block" v-on:click="login()">
+                <form class="form-signin" v-on:submit="login">
+                <input v-model="user" type="text" class="form-control" placeholder="Usuario" required autofocus>
+                <input v-model="password" type="password" class="form-control" placeholder="Password" required>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">
                     Ingresar</button>
                 <label class="checkbox pull-left">
                     <input type="checkbox" value="remember-me">
@@ -107,21 +106,22 @@ display: block;
 }
 </style>
 <script>
+import auth from '../js/auth.js';
 
   export default {
     data() {
       return {
         error: '',
         token: document.getElementById('token').value,
-        info: {
-            user: '',
-            password: ''
-        }
+        user: '',
+        password: ''
       }
     },
     methods: {
-      login () {
-        var data = JSON.stringify(this.info);
+      login (event) {
+          event.preventDefault()
+          auth.signin(this, this.user, this.password)
+        /*var data = JSON.stringify(this.info);
         this.$http.post('/login', data)
         .then(function(res){
               if(res.body.error){
@@ -134,7 +134,7 @@ display: block;
               }
             }, function(response){
             console.log(response.data);
-         })
+         })*/
       },
       logout() {
 

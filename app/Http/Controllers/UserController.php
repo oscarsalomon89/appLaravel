@@ -12,9 +12,14 @@ class UserController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function index(Request $request)
     {
-        //$this->middleware('auth');
+        $data = [];
+        $data['name'] = $request->user()->name;
+        $data['email'] = $request->user()->email;
+        return response()->json([
+            'data' => $data,
+        ]);
     }
 
     /**

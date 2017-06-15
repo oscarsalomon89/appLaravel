@@ -18,7 +18,7 @@
                 <li id="navContact"><router-link to="/pedidos">Pedidos</router-link></li>
                 <li id="navContact"><router-link to="/consultas">Consultas</router-link></li>
               </ul>
-              <ul class="nav navbar-nav navbar-right" v-if="authenticated">
+              <ul class="nav navbar-nav navbar-right" v-if="auth.user.authenticated">
                 <li class="dropdown">
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Config <span class="caret"></span></a>
                   <ul class="dropdown-menu">
@@ -33,16 +33,17 @@
         </nav>
 </template>
 <script>
+import auth from '../js/auth.js'
 
  export default {
    data() {
      return {
-       authenticated: localStorage.getItem('id_token')
+       auth: auth
      }
    },
    methods: {
      logout() {
-
+        auth.signout()
      }
    }
  }

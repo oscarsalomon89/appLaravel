@@ -2,14 +2,14 @@ import Vue          from 'vue'
 import Router       from 'vue-router'
 import VueResource  from 'vue-resource'
 
-import Dashboard  from '../components/Dashboard.vue'
-import About      from '../components/About.vue'
-import Home       from '../components/Home.vue'
-import Contact    from '../components/Contact.vue'
-import Pedidos    from '../components/Pedidos.vue'
-import Login      from '../components/Login.vue'
-import Signup     from '../components/Signup.vue'
-import Clientes   from '../components/Clientes.vue'
+import Dashboard  from '../../components/Dashboard.vue'
+import About      from '../../components/About.vue'
+import Home       from '../../components/Home.vue'
+import Contact    from '../../components/Contact.vue'
+import Pedidos    from '../../components/Pedidos.vue'
+import Login      from '../../components/Login.vue'
+import Register     from '../../components/Register.vue'
+import Clientes   from '../../components/Clientes.vue'
 
 Vue.use(Router)
 Vue.use(VueResource)
@@ -49,7 +49,7 @@ export default new Router({
       /*beforeEnter: function(to, from, next) {
                 auth.islogin(to, from, next);
       },*/
-      component: Signup
+      component: Register
     },
     {
       path: '/pedidos',
