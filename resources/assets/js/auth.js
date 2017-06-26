@@ -6,13 +6,16 @@ export default {
         authenticated: false,
         profile: null
     },
-    check() {
+    check(to, from, next) {
         if (localStorage.getItem('id_token') !== null) {
             Vue.http.get(
                 'api/user',
             ).then(response => {
                 this.user.authenticated = true
                 this.user.profile = response.data.data
+                next()
+            }, response => {
+                next('/login');
             })
         }
     },

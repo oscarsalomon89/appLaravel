@@ -33,7 +33,7 @@ class AuthController extends Controller
 
         if (!$token) {
             return response()->json([
-                'error' => 'Could not authenticate',
+                'error' => 'Usuario o contraseña incorrecto',
             ], 401);
         } else {
             $data = [];

@@ -7,10 +7,10 @@
             <div class="account-wall">
                 <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
                     alt="">
-                    <div style="width:80%;margin-left:10%;" v-if="error != ''" class="alert alert-danger text-center" role="alert">
+                    <div style="width:80%;margin-left:10%;" v-if="error" class="alert alert-danger text-center" role="alert">
                       <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                       <span class="sr-only">Error:</span>
-                      {{error}}
+                      Usuario o contraseña incorrecto
                     </div>
                 <form class="form-signin" v-on:submit="login">
                 <input v-model="user" type="text" class="form-control" placeholder="Usuario" required autofocus>
@@ -138,4 +138,4 @@ import auth from '../js/auth.js';
       }
     }
   }
-</script>
+</script>y

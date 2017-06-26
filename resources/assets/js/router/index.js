@@ -1,6 +1,7 @@
 import Vue          from 'vue'
 import Router       from 'vue-router'
 import VueResource  from 'vue-resource'
+import auth   from '../auth.js'
 
 import Dashboard  from '../../components/Dashboard.vue'
 import About      from '../../components/About.vue'
@@ -25,7 +26,10 @@ export default new Router({
     {
       path: '/inicio',
       name: 'Home',
-      component: Home
+      component: Home,
+      beforeEnter: function(to, from, next) {
+                auth.check(to, from, next);
+      }
     },
     {
       path: '/clientes',
