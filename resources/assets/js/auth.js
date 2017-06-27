@@ -6,17 +6,22 @@ export default {
         authenticated: false,
         profile: null
     },
-    check(to, from, next) {
+    check() {
         if (localStorage.getItem('id_token') !== null) {
             Vue.http.get(
                 'api/user',
             ).then(response => {
                 this.user.authenticated = true
                 this.user.profile = response.data.data
-                next()
             }, response => {
-                next('/login');
+                localStorage.removeItem('id_token')
+                this.user.authenticated = false
+                this.user.profile = null
+
+                router.push('login')
             })
+        }else{
+            router.push('login')
         }
     },
     register(context, name, email, password) {
@@ -45,7 +50,6 @@ export default {
             context.error = false
             localStorage.setItem('id_token', response.data.meta.token)
             Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token')
-
             this.user.authenticated = true
             this.user.profile = response.data.data
 

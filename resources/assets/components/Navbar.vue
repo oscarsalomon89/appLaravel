@@ -20,7 +20,8 @@
               </ul>
               <ul class="nav navbar-nav navbar-right" v-if="auth.user.authenticated">
                 <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Config <span class="caret"></span></a>
+                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  {{auth.user.profile.name}} <span class="caret"></span></a>
                   <ul class="dropdown-menu">
                     <li><a href="#">Configuracion</a></li>
                     <li role="separator" class="divider"></li>

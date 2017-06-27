@@ -26,10 +26,7 @@ export default new Router({
     {
       path: '/inicio',
       name: 'Home',
-      component: Home,
-      beforeEnter: function(to, from, next) {
-                auth.check(to, from, next);
-      }
+      component: Home
     },
     {
       path: '/clientes',

@@ -12,7 +12,7 @@ import auth from '../js/auth.js'
               messageFinal: ''
             }
           },
-        mounted() {
+        beforeCreate() {
             auth.check()
         }
     }
