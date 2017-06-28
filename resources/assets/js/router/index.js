@@ -42,7 +42,12 @@ export default new Router({
       path: '/login',
       name: 'Login',
       /*beforeEnter: function(to, from, next) {
-                auth.islogin(to, from, next);
+        alert(auth.user.authenticated);
+            if(auth.user.authenticated){
+              next('/inicio')
+            }else{
+              next();
+            }
       },*/
       component: Login
     },

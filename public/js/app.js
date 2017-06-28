@@ -14463,7 +14463,12 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.options.root = 'http://localhos
     path: '/login',
     name: 'Login',
     /*beforeEnter: function(to, from, next) {
-              auth.islogin(to, from, next);
+      alert(auth.user.authenticated);
+          if(auth.user.authenticated){
+            next('/inicio')
+          }else{
+            next();
+          }
     },*/
     component: __WEBPACK_IMPORTED_MODULE_9__components_Login_vue___default.a
   }, {
@@ -28040,7 +28045,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "to": "/inicio"
     }
-  }, [_vm._v("Inicio")])], 1), _vm._v(" "), _c('li', {
+  }, [_vm._v("Inicio")])], 1), _vm._v(" "), (_vm.auth.user.profile.rol == 1) ? _c('li', {
     attrs: {
       "id": "navCli"
     }
@@ -28048,7 +28053,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "to": "/clientes"
     }
-  }, [_vm._v("Clientes")])], 1), _vm._v(" "), _c('li', {
+  }, [_vm._v("Clientes")])], 1) : _vm._e(), _vm._v(" "), _c('li', {
     attrs: {
       "id": "navAbout"
     }
