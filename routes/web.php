@@ -36,5 +36,6 @@ Route::get('/logout','Auth\LoginController@logOut');*/
 Route::get('/clientes', 'HomeController@index')->name('clientes');
 
 Route::get('/login','HomeController@index');
+Route::get('/signup','HomeController@index');
 Route::get('/about','HomeController@index');
 Route::get('/api/users','UserController@getUsers');

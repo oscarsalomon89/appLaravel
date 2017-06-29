@@ -4627,7 +4627,19 @@ module.exports = function normalizeComponent (
             __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */].push('login');
         }
     },
+    islogin: function islogin(to, from, next) {
+        if (localStorage.getItem('id_token') !== null) {
+            __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.get('api/user').then(function (response) {
+                __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */].push('inicio');
+            }, function (response) {
+                next();
+            });
+        } else {
+            next();
+        }
+    },
     register: function register(context, name, email, password) {
+
         __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.post('api/register', {
             name: name,
             email: email,
@@ -4635,6 +4647,7 @@ module.exports = function normalizeComponent (
         }).then(function (response) {
             context.success = true;
         }, function (response) {
+            console.log(response.data);
             context.response = response.data;
             context.error = true;
         });
@@ -14462,35 +14475,24 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.options.root = 'http://localhos
   }, {
     path: '/login',
     name: 'Login',
-    /*beforeEnter: function(to, from, next) {
-      alert(auth.user.authenticated);
-          if(auth.user.authenticated){
-            next('/inicio')
-          }else{
-            next();
-          }
-    },*/
+    beforeEnter: function beforeEnter(to, from, next) {
+      __WEBPACK_IMPORTED_MODULE_3__auth_js__["a" /* default */].islogin(to, from, next);
+    },
     component: __WEBPACK_IMPORTED_MODULE_9__components_Login_vue___default.a
   }, {
     path: '/signup',
     name: 'Signup',
-    /*beforeEnter: function(to, from, next) {
-              auth.islogin(to, from, next);
-    },*/
+    beforeEnter: function beforeEnter(to, from, next) {
+      __WEBPACK_IMPORTED_MODULE_3__auth_js__["a" /* default */].islogin(to, from, next);
+    },
     component: __WEBPACK_IMPORTED_MODULE_10__components_Register_vue___default.a
   }, {
     path: '/pedidos',
     name: 'Pedidos',
-    /*beforeEnter: function(to, from, next) {
-              auth.requireAuth(to, from, next);
-    },*/
     component: __WEBPACK_IMPORTED_MODULE_8__components_Pedidos_vue___default.a
   }, {
     path: '/consultas',
     name: 'Contact',
-    /*beforeEnter: function(to, from, next) {
-              auth.requireAuth(to, from, next);
-    },*/
     component: __WEBPACK_IMPORTED_MODULE_7__components_Contact_vue___default.a
   }]
 }));

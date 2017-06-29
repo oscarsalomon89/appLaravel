@@ -41,39 +41,28 @@ export default new Router({
     {
       path: '/login',
       name: 'Login',
-      /*beforeEnter: function(to, from, next) {
-        alert(auth.user.authenticated);
-            if(auth.user.authenticated){
-              next('/inicio')
-            }else{
-              next();
-            }
-      },*/
+      beforeEnter: function(to, from, next) {
+        auth.islogin(to, from, next);
+      },
       component: Login
     },
     {
       path: '/signup',
       name: 'Signup',
-      /*beforeEnter: function(to, from, next) {
-                auth.islogin(to, from, next);
-      },*/
+      beforeEnter: function(to, from, next) {
+        auth.islogin(to, from, next);
+      },
       component: Register
     },
     {
       path: '/pedidos',
       name: 'Pedidos',
-      /*beforeEnter: function(to, from, next) {
-                auth.requireAuth(to, from, next);
-      },*/
       component: Pedidos
     }
     ,
     {
       path: '/consultas',
       name: 'Contact',
-      /*beforeEnter: function(to, from, next) {
-                auth.requireAuth(to, from, next);
-      },*/
       component: Contact
     }
   ]

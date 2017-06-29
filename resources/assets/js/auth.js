@@ -24,7 +24,21 @@ export default {
             router.push('login')
         }
     },
+    islogin(to, from, next) {
+        if (localStorage.getItem('id_token') !== null) {
+            Vue.http.get(
+                'api/user',
+            ).then(response => {
+                router.push('inicio')
+            }, response => {
+                next()
+            })
+        }else{
+            next()
+        }
+    },
     register(context, name, email, password) {
+        
         Vue.http.post(
             'api/register',
             {
@@ -35,6 +49,7 @@ export default {
         ).then(response => {
             context.success = true
         }, response => {
+            console.log(response.data);
             context.response = response.data
             context.error = true
         })
