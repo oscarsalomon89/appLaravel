@@ -37,8 +37,7 @@ export default {
             next()
         }
     },
-    register(context, name, email, password) {
-        
+    register(context, name, email, password) {        
         Vue.http.post(
             'api/register',
             {
@@ -49,7 +48,6 @@ export default {
         ).then(response => {
             context.success = true
         }, response => {
-            console.log(response.data);
             context.response = response.data
             context.error = true
         })

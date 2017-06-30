@@ -4639,7 +4639,6 @@ module.exports = function normalizeComponent (
         }
     },
     register: function register(context, name, email, password) {
-
         __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.post('api/register', {
             name: name,
             email: email,
@@ -4647,7 +4646,6 @@ module.exports = function normalizeComponent (
         }).then(function (response) {
             context.success = true;
         }, function (response) {
-            console.log(response.data);
             context.response = response.data;
             context.error = true;
         });
