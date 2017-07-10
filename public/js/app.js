@@ -25951,6 +25951,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Navbar_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__Navbar_vue__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sweetalert2__ = __webpack_require__(139);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_sweetalert2__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_vue__);
 //
 //
 //
@@ -25992,6 +25994,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+
 
 
 
@@ -26029,32 +26032,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             if (email === '' || user === '' || pass == '') {
               reject('Datos incompletos');
             } else {
-              resolve();
+              var data = {
+                name: document.getElementById('inputUser').value,
+                email: document.getElementById('inputEmail').value,
+                password: document.getElementById('inputPassword').value
+              };
+
+              __WEBPACK_IMPORTED_MODULE_2_vue___default.a.http.post('api/register', data).then(function (res) {
+                resolve();
+                this.getUsers();
+              }, function (response) {
+                if (response.status == 422) {
+                  reject(response.body.email[0]);
+                }
+              });
             }
           });
         },
         allowOutsideClick: false
       }).then(function () {
-        var data = {
-          name: document.getElementById('inputUser').value,
-          email: document.getElementById('inputEmail').value,
-          password: document.getElementById('inputPassword').value
-        };
-        this.addUser(data);
-      });
-    },
-    addUser: function addUser(data) {
-      this.$http.post('/register', data).then(function (res) {
         __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default()({
           type: 'success',
           title: 'Exito!',
           html: 'El usuario se agrego correctamente'
-        });
-      }, function (response) {
-        __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default()({
-          type: 'error',
-          title: 'Error!',
-          html: 'No se pudo grabar el usuario'
         });
       });
     }

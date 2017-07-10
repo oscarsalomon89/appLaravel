@@ -21,12 +21,18 @@ class RegisterFormRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
-    {
+    public function rules(){
         return [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',
+        ];
+    }
+
+    public function messages(){
+        return [
+            'email.email' => 'El formato del correo no es valido',
+            'email.unique'  => 'El correo que desea agregar ya existe',
         ];
     }
 }

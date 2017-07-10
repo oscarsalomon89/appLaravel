@@ -13,11 +13,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthController extends Controller
 {
     public function register(RegisterFormRequest $request){
-        User::create([
-            'name' => $request->json('name'),
-            'email' => $request->json('email'),
-            'password' => bcrypt($request->json('password')),
-        ]);
+        User::create($request->all());
     }
 
     public function signin(Request $request){

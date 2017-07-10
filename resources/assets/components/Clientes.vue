@@ -42,6 +42,7 @@
 <script>
   import Navbar from './Navbar.vue'
   import swal from 'sweetalert2'
+  import Vue from 'vue'
 
   export default {
     components: {'Navbar': Navbar },
@@ -95,36 +96,33 @@
                   if (email === '' || user==='' || pass == '') {
                     reject('Datos incompletos')
                   } else {
-                    resolve()
+                    var data = {
+                        name: document.getElementById('inputUser').value,
+                        email: document.getElementById('inputEmail').value,
+                        password: document.getElementById('inputPassword').value
+                        };
+
+                    Vue.http.post('api/register', data)
+                          .then(function(res){
+                                resolve();
+                                this.getUsers();             
+                              }, function(response){
+                                if (response.status ==422){
+                                    reject(response.body.email[0]);
+                                }
+                          })                    
                   }
               })
             },
             allowOutsideClick: false
-          }).then(function () {
-              var data = {
-                      name: document.getElementById('inputUser').value,
-                      email: document.getElementById('inputEmail').value,
-                      password: document.getElementById('inputPassword').value
-                  };
-              this.addUser(data);                          
+          }).then(function() {
+              swal({
+                    type: 'success',
+                    title: 'Exito!',
+                    html: 'El usuario se agrego correctamente'
+                  })                         
           })
-      },
-      addUser(data){
-          this.$http.post('/register', data)
-                    .then(function(res){
-                              swal({
-                                type: 'success',
-                                title: 'Exito!',
-                                html: 'El usuario se agrego correctamente'
-                              })                    
-                        }, function(response){
-                              swal({
-                                type: 'error',
-                                title: 'Error!',
-                                html: 'No se pudo grabar el usuario'
-                              })
-                    })
-      }
+      }      
     }
   }
 </script>
