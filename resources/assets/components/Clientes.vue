@@ -34,6 +34,7 @@
             </td>
         </tr>
     </table>
+      <pagination v-ref:table for="table" :per-page="PerPage" :records="Records"></pagination>
         </div>
     </div>
   </div>
@@ -42,26 +43,49 @@
 <script>
   import Navbar from './Navbar.vue'
   import swal from 'sweetalert2'
-  import Vue from 'vue'
+  import {Pagination, PaginationEvent} from 'vue-pagination-2';
 
   export default {
-    components: {'Navbar': Navbar },
+    components: {'Navbar': Navbar,Pagination},
     data() {
       return {
-        listUsers: []
+        listUsers: [],
+        table1Page:1,
+        table2Page:1,
+        code:'table1',
+        records:0,
+        perpage:10
       }
     },
     created: function () {
-      this.getUsers ();
+      this.getUsers();      
+    },
+    computed:{
+      PerPage: function() {
+        return this.perpage?parseInt(this.perpage):25;
+      },
+      Records: function() {
+        return this.records?parseInt(this.records):0;
+      },
+      totalPages: function() {
+        return this.$refs.table.totalPages;
+      }
+    },
+  ready: function() {
+      this.$on('vue-pagination::table', function(page) {
+        this.table1Page = page;	
+      });
     },
     methods: {
       getUsers () {
         this.$http.get('/api/users')
         .then(function(res){
                 this.listUsers = res.data;
+                this.records = this.listUsers.length;
             })
       },
       openAddUser(){
+        let vm = this;
         var form = '<form class="form-horizontal">'
                     +'<div class="form-group">'
                       +'<label for="inputUser" class="col-sm-4 control-label">Usuario</label>'
@@ -88,6 +112,7 @@
             showCancelButton: true,
             confirmButtonText: 'Guardar',
             showLoaderOnConfirm: true,
+            allowOutsideClick: false,
             preConfirm: function () {
               return new Promise(function (resolve, reject) {
                   var user = document.getElementById('inputUser').value;
@@ -102,19 +127,18 @@
                         password: document.getElementById('inputPassword').value
                         };
 
-                    Vue.http.post('api/register', data)
+                      vm.$http.post('api/register', data)
                           .then(function(res){
                                 resolve();
-                                this.getUsers();             
+                                vm.getUsers();             
                               }, function(response){
                                 if (response.status ==422){
                                     reject(response.body.email[0]);
                                 }
-                          })                    
+                          })
                   }
               })
-            },
-            allowOutsideClick: false
+            }         
           }).then(function() {
               swal({
                     type: 'success',
