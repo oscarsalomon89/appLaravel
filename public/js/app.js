@@ -25949,26 +25949,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Navbar_vue__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Navbar_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__Navbar_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sweetalert2__ = __webpack_require__(139);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_sweetalert2__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue_pagination_2__ = __webpack_require__(180);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_vue_pagination_2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_vue_pagination_2__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Cliente_vue__ = __webpack_require__(178);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Cliente_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__Cliente_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_sweetalert2__ = __webpack_require__(139);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_sweetalert2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_sweetalert2__);
 //
 //
 //
@@ -26001,48 +25985,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  components: { 'Navbar': __WEBPACK_IMPORTED_MODULE_0__Navbar_vue___default.a, Pagination: __WEBPACK_IMPORTED_MODULE_2_vue_pagination_2__["Pagination"] },
+  components: { 'Navbar': __WEBPACK_IMPORTED_MODULE_0__Navbar_vue___default.a, 'Cliente': __WEBPACK_IMPORTED_MODULE_1__Cliente_vue___default.a },
   data: function data() {
     return {
-      listUsers: [],
-      table1Page: 1,
-      table2Page: 1,
-      code: 'table1',
-      records: 0,
-      perpage: 10
+      listUsers: []
     };
   },
 
   created: function created() {
     this.getUsers();
   },
-  computed: {
-    PerPage: function PerPage() {
-      return this.perpage ? parseInt(this.perpage) : 25;
-    },
-    Records: function Records() {
-      return this.records ? parseInt(this.records) : 0;
-    },
-    totalPages: function totalPages() {
-      return this.$refs.table.totalPages;
-    }
-  },
-  ready: function ready() {
-    this.$on('vue-pagination::table', function (page) {
-      this.table1Page = page;
-    });
-  },
   methods: {
     getUsers: function getUsers() {
       this.$http.get('/api/users').then(function (res) {
         this.listUsers = res.data;
-        this.records = this.listUsers.length;
       });
     },
     openAddUser: function openAddUser() {
       var vm = this;
       var form = '<form class="form-horizontal">' + '<div class="form-group">' + '<label for="inputUser" class="col-sm-4 control-label">Usuario</label>' + '<div class="col-sm-8">' + '<input type="text" class="form-control" id="inputUser" placeholder="Nombre usuario">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputPassword" class="col-sm-4 control-label">Password</label>' + '<div class="col-sm-8">' + '<input type="password" class="form-control" id="inputPassword" placeholder="Password">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputEmail" class="col-sm-4 control-label">Email</label>' + '<div class="col-sm-8">' + '<input type="email" class="form-control" id="inputEmail" placeholder="Email">' + '</div>' + '</div>' + '</form>';
-      __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default()({
+      __WEBPACK_IMPORTED_MODULE_2_sweetalert2___default()({
         title: 'Nuevo Cliente',
         html: form,
         showCancelButton: true,
@@ -26075,7 +26037,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
           });
         }
       }).then(function () {
-        __WEBPACK_IMPORTED_MODULE_1_sweetalert2___default()({
+        __WEBPACK_IMPORTED_MODULE_2_sweetalert2___default()({
           type: 'success',
           title: 'Exito!',
           html: 'El usuario se agrego correctamente'
@@ -29032,55 +28994,17 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_c('table', {
     staticClass: "table table-bordered"
   }, [_vm._m(1), _vm._v(" "), _vm._l((_vm.listUsers), function(item) {
-    return _c('tr', [_c('th', {
+    return _c('cliente', {
+      key: item._id,
       attrs: {
-        "scope": "row"
+        "user": item
       }
-    }, [_vm._v(_vm._s(item.id))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(item.username))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(item.email))]), _vm._v(" "), _vm._m(2, true), _vm._v(" "), _c('td', [_c('button', {
-      staticClass: "btn btn-danger btn-xs",
-      on: {
-        "click": function($event) {
-          _vm.authUser(item._id)
-        }
-      }
-    }, [_c('span', {
-      staticClass: "glyphicon glyphicon-remove",
-      attrs: {
-        "aria-hidden": "true"
-      }
-    })]), _vm._v(" "), _c('button', {
-      staticClass: "btn btn-success btn-xs",
-      on: {
-        "click": function($event) {
-          _vm.editMessage(item._id)
-        }
-      }
-    }, [_c('span', {
-      staticClass: "glyphicon glyphicon-edit",
-      attrs: {
-        "aria-hidden": "true"
-      }
-    })])])])
-  })], 2), _vm._v(" "), _c('pagination', {
-    directives: [{
-      name: "ref",
-      rawName: "v-ref:table",
-      arg: "table"
-    }],
-    attrs: {
-      "for": "table",
-      "per-page": _vm.PerPage,
-      "records": _vm.Records
-    }
-  })], 1)])])], 1)
+    })
+  })], 2)])])])], 1)
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('h1', [_vm._v("Clientes "), _c('small', [_vm._v("Subtext for header")])])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('tr', [_c('th', [_vm._v("#")]), _vm._v(" "), _c('th', [_vm._v("User")]), _vm._v(" "), _c('th', [_vm._v("Email")]), _vm._v(" "), _c('th', [_vm._v("Auth")]), _vm._v(" "), _c('th')])
-},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('td', [_c('span', {
-    staticClass: "label label-default"
-  }, [_vm._v("act")])])
 }]}
 module.exports.render._withStripped = true
 if (false) {
@@ -34099,296 +34023,121 @@ module.exports = __webpack_require__(124);
 /* 175 */,
 /* 176 */,
 /* 177 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
+/* harmony default export */ __webpack_exports__["default"] = ({
+   name: 'Cliente',
+   props: ['user'],
+   data: function data() {
+      return {
+         editing: false
+      };
+   },
 
-var _vue = __webpack_require__(4);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var bus = new _vue2.default();
-
-module.exports = bus;
+   methods: {}
+});
 
 /***/ }),
 /* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(177),
+  /* template */
+  __webpack_require__(179),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\Cliente.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] Cliente.vue: functional components are not supported with templates, they should use render functions.")}
 
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var template = __webpack_require__(179);
-var bus = __webpack_require__(177);
-
-module.exports = {
-  render: template(),
-  props: {
-    for: {
-      type: String,
-      required: true
-    },
-    records: {
-      type: Number,
-      required: true
-    },
-    perPage: {
-      type: Number,
-      required: false,
-      default: 25
-    },
-    chunk: {
-      type: Number,
-      required: false,
-      default: 10
-    },
-    countText: {
-      type: String,
-      required: false,
-      default: 'Showing {from} to {to} of {count} records|{count} records|One record'
-    },
-    vuex: {
-      type: Boolean
-    }
-  },
-  created: function created() {
-
-    if (!this.vuex) return;
-
-    var name = this.for;
-
-    if (this.$store.state[name]) return;
-
-    this.$store.registerModule(this.for, {
-      state: {
-        page: 1
-      },
-      mutations: _defineProperty({}, name + '/PAGINATE', function undefined(state, page) {
-        state.page = page;
-      })
-    });
-  },
-  data: function data() {
-    return {
-      Page: 1
-    };
-  },
-  computed: {
-    page: function page() {
-      return this.vuex ? this.$store.state[this.for].page : this.Page;
-    },
-
-    pages: function pages() {
-      if (!this.records) return [];
-
-      return range(this.paginationStart, this.pagesInCurrentChunk);
-    },
-    totalPages: function totalPages() {
-      return this.records ? Math.ceil(this.records / this.perPage) : 1;
-    },
-    totalChunks: function totalChunks() {
-      return Math.ceil(this.totalPages / this.chunk);
-    },
-    currentChunk: function currentChunk() {
-      return Math.ceil(this.page / this.chunk);
-    },
-    paginationStart: function paginationStart() {
-      return (this.currentChunk - 1) * this.chunk + 1;
-    },
-    pagesInCurrentChunk: function pagesInCurrentChunk() {
-
-      return this.paginationStart + this.chunk <= this.totalPages ? this.chunk : this.totalPages - this.paginationStart + 1;
-    },
-    count: function count() {
-
-      var from = (this.page - 1) * this.perPage + 1;
-      var to = this.page == this.totalPages ? this.records : from + this.perPage - 1;
-      var parts = this.countText.split('|');
-      var i = Math.min(this.records == 1 ? 2 : this.totalPages == 1 ? 1 : 0, parts.length - 1);
-
-      return parts[i].replace('{count}', this.records).replace('{from}', from).replace('{to}', to);
-    }
-  },
-  methods: {
-    setPage: function setPage(page) {
-      if (this.allowedPage(page)) {
-        this.paginate(page);
-      }
-    },
-    paginate: function paginate(page) {
-      if (this.vuex) {
-        this.$store.commit(this.for + '/PAGINATE', page);
-      } else {
-        this.Page = page;
-        bus.$emit('vue-pagination::' + this.for, page);
-      }
-    },
-
-    next: function next() {
-      return this.setPage(this.page + 1);
-    },
-    prev: function prev() {
-      return this.setPage(this.page - 1);
-    },
-    nextChunk: function nextChunk() {
-      return this.setChunk(1);
-    },
-    prevChunk: function prevChunk() {
-      return this.setChunk(-1);
-    },
-    setChunk: function setChunk(direction) {
-      this.setPage((this.currentChunk - 1 + direction) * this.chunk + 1);
-    },
-    allowedPage: function allowedPage(page) {
-      return page >= 1 && page <= this.totalPages;
-    },
-    allowedChunk: function allowedChunk(direction) {
-      return direction == 1 && this.currentChunk < this.totalChunks || direction == -1 && this.currentChunk > 1;
-    },
-    allowedPageClass: function allowedPageClass(direction) {
-      return this.allowedPage(direction) ? '' : 'disabled';
-    },
-    allowedChunkClass: function allowedChunkClass(direction) {
-      return this.allowedChunk(direction) ? '' : 'disabled';
-    },
-    activeClass: function activeClass(page) {
-      return this.page == page ? 'active' : '';
-    }
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-4997d45a", Component.options)
+  } else {
+    hotAPI.reload("data-v-4997d45a", Component.options)
   }
-};
+})()}
 
-function range(start, count) {
-  return Array.apply(0, Array(count)).map(function (element, index) {
-    return index + start;
-  });
-}
+module.exports = Component.exports
+
 
 /***/ }),
 /* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-module.exports = function () {
-  return function (h) {
-
-    var items = [];
-
-    this.pages.map(function (page) {
-      items.push(h(
-        "li",
-        { "class": "VuePagination__pagination-item page-item " + this.activeClass(page) },
-        [h(
-          "a",
-          { "class": "page-link", attrs: { role: "button"
-            },
-            on: {
-              click: this.setPage.bind(this, page)
-            }
-          },
-          [page]
-        )]
-      ));
-    }.bind(this));
-
-    return h(
-      "div",
-      { "class": "VuePagination" },
-      [h(
-        "ul",
-        {
-          directives: [{
-            name: "show",
-            value: this.totalPages > 1
-          }],
-
-          "class": "pagination VuePagination__pagination" },
-        [h(
-          "li",
-          { "class": "VuePagination__pagination-item page-item VuePagination__pagination-item-prev-chunk " + this.allowedChunkClass(-1) },
-          [h(
-            "a",
-            { "class": "page-link", attrs: { href: "javascript:void(0);"
-              },
-              on: {
-                click: this.setChunk.bind(this, -1)
-              }
-            },
-            ["<<"]
-          )]
-        ), h(
-          "li",
-          { "class": "VuePagination__pagination-item page-item VuePagination__pagination-item-prev-page " + this.allowedPageClass(this.page - 1) },
-          [h(
-            "a",
-            { "class": "page-link", attrs: { href: "javascript:void(0);"
-              },
-              on: {
-                click: this.prev.bind(this)
-              }
-            },
-            ["<"]
-          )]
-        ), items, h(
-          "li",
-          { "class": "VuePagination__pagination-item page-item VuePagination__pagination-item-next-page " + this.allowedPageClass(this.page + 1) },
-          [h(
-            "a",
-            { "class": "page-link", attrs: { href: "javascript:void(0);"
-              },
-              on: {
-                click: this.next.bind(this)
-              }
-            },
-            [">"]
-          )]
-        ), h(
-          "li",
-          { "class": "VuePagination__pagination-item page-item VuePagination__pagination-item-next-chunk " + this.allowedChunkClass(1) },
-          [h(
-            "a",
-            { "class": "page-link", attrs: { href: "javascript:void(0);"
-              },
-              on: {
-                click: this.setChunk.bind(this, 1)
-              }
-            },
-            [">>"]
-          )]
-        )]
-      ), h(
-        "p",
-        {
-          directives: [{
-            name: "show",
-            value: parseInt(this.records)
-          }],
-
-          "class": "VuePagination__count" },
-        [this.count]
-      )]
-    );
-  };
-};
-
-/***/ }),
-/* 180 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Pagination = __webpack_require__(178);
-var PaginationEvent = __webpack_require__(177);
-
-module.exports = {
-  Pagination:Pagination,
-  PaginationEvent:PaginationEvent
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('tr', [_c('th', {
+    attrs: {
+      "scope": "row"
+    }
+  }, [_vm._v(_vm._s(_vm.user.id))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.username))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.email))]), _vm._v(" "), _vm._m(0), _vm._v(" "), _c('td', [_c('button', {
+    staticClass: "btn btn-danger btn-xs",
+    on: {
+      "click": function($event) {
+        _vm.authUser(_vm.user._id)
+      }
+    }
+  }, [_c('span', {
+    staticClass: "glyphicon glyphicon-remove",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  })]), _vm._v(" "), _c('button', {
+    staticClass: "btn btn-success btn-xs",
+    on: {
+      "click": function($event) {
+        _vm.editMessage(_vm.user._id)
+      }
+    }
+  }, [_c('span', {
+    staticClass: "glyphicon glyphicon-edit",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  })])])])
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('td', [_c('span', {
+    staticClass: "label label-default"
+  }, [_vm._v("act")])])
+}]}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-4997d45a", module.exports)
+  }
 }
-
 
 /***/ })
 /******/ ]);

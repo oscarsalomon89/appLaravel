@@ -10,31 +10,15 @@
       </div>
       <div class="col-md-6">
           <table class="table table-bordered">
-        <tr>
-            <th>#</th>
-            <th>User</th>
-            <th>Email</th>
-            <th>Auth</th>
-            <th></th>
-        </tr>
-        <tr v-for="item in listUsers">
-            <th scope="row">{{item.id}}</th>
-            <td>{{item.username}}</td>
-            <td>{{ item.email }}</td>
-            <td>
-            <span class="label label-default">act</span>
-            </td>
-            <td>
-            <button v-on:click="authUser(item._id)" class="btn btn-danger btn-xs">
-                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </button>
-            <button v-on:click="editMessage(item._id)" class="btn btn-success btn-xs">
-                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-            </button>
-            </td>
-        </tr>
-    </table>
-      <pagination v-ref:table for="table" :per-page="PerPage" :records="Records"></pagination>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Auth</th>
+                <th></th>
+            </tr>
+            <cliente v-for="item in listUsers" :user="item" :key="item._id"></cliente>            
+          </table>
         </div>
     </div>
   </div>
@@ -42,46 +26,24 @@
 </template>
 <script>
   import Navbar from './Navbar.vue'
+  import Cliente from './Cliente.vue'
   import swal from 'sweetalert2'
-  import {Pagination, PaginationEvent} from 'vue-pagination-2';
 
   export default {
-    components: {'Navbar': Navbar,Pagination},
+    components: {'Navbar': Navbar,'Cliente':Cliente},
     data() {
       return {
-        listUsers: [],
-        table1Page:1,
-        table2Page:1,
-        code:'table1',
-        records:0,
-        perpage:10
+        listUsers: []
       }
     },
     created: function () {
       this.getUsers();      
-    },
-    computed:{
-      PerPage: function() {
-        return this.perpage?parseInt(this.perpage):25;
-      },
-      Records: function() {
-        return this.records?parseInt(this.records):0;
-      },
-      totalPages: function() {
-        return this.$refs.table.totalPages;
-      }
-    },
-  ready: function() {
-      this.$on('vue-pagination::table', function(page) {
-        this.table1Page = page;	
-      });
     },
     methods: {
       getUsers () {
         this.$http.get('/api/users')
         .then(function(res){
                 this.listUsers = res.data;
-                this.records = this.listUsers.length;
             })
       },
       openAddUser(){
