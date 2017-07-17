@@ -4607,6 +4607,7 @@ module.exports = function normalizeComponent (
 /* harmony default export */ __webpack_exports__["a"] = ({
     user: {
         authenticated: false,
+        rol: null,
         profile: null
     },
     check: function check() {
@@ -4616,11 +4617,12 @@ module.exports = function normalizeComponent (
             __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.get('api/user').then(function (response) {
                 _this.user.authenticated = true;
                 _this.user.profile = response.data.data;
+                _this.user.rol = response.data.data['rol'];
             }, function (response) {
                 localStorage.removeItem('id_token');
                 _this.user.authenticated = false;
                 _this.user.profile = null;
-
+                _this.user.rol = null;
                 __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */].push('login');
             });
         } else {
@@ -4662,7 +4664,7 @@ module.exports = function normalizeComponent (
             __WEBPACK_IMPORTED_MODULE_0_vue___default.a.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
             _this2.user.authenticated = true;
             _this2.user.profile = response.data.data;
-
+            _this2.user.rol = response.data.data['rol'];
             __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */].push('inicio');
         }, function (response) {
             context.error = true;
@@ -4672,7 +4674,7 @@ module.exports = function normalizeComponent (
         localStorage.removeItem('id_token');
         this.user.authenticated = false;
         this.user.profile = null;
-
+        this.user.rol = null;
         __WEBPACK_IMPORTED_MODULE_1__router__["a" /* default */].push('login');
     }
 });
@@ -29709,7 +29711,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "to": "/inicio"
     }
-  }, [_vm._v("Inicio")])], 1), _vm._v(" "), (_vm.auth.user.profile.rol == 1) ? _c('li', {
+  }, [_vm._v("Inicio")])], 1), _vm._v(" "), (_vm.auth.user.rol == 1) ? _c('li', {
     attrs: {
       "id": "navCli"
     }

@@ -4,6 +4,7 @@ import router from './router'
 export default {
     user: {
         authenticated: false,
+        rol: null,
         profile: null
     },
     check() {
@@ -13,11 +14,12 @@ export default {
             ).then(response => {
                 this.user.authenticated = true
                 this.user.profile = response.data.data
+                this.user.rol = response.data.data['rol'];
             }, response => {
                 localStorage.removeItem('id_token')
                 this.user.authenticated = false
                 this.user.profile = null
-
+                this.user.rol = null
                 router.push('login')
             })
         }else{
@@ -65,7 +67,7 @@ export default {
             Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token')
             this.user.authenticated = true
             this.user.profile = response.data.data
-
+            this.user.rol = response.data.data['rol'];
             router.push('inicio')
         }, response => {
             context.error = true
@@ -75,7 +77,7 @@ export default {
         localStorage.removeItem('id_token')
         this.user.authenticated = false
         this.user.profile = null
-
+        this.user.rol = null
         router.push('login')
     }
 }
