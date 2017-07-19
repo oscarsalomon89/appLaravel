@@ -1,9 +1,19 @@
 //inicializamos el estado de los users
+import Vue from 'vue'
+
 export const state = {
     users: []
 }
  
 export const mutations = {
+    //obtener usuarios
+    getUsers () {
+        Vue.http.get('/api/users')
+        .then(function(res){
+                state.users = res.data;
+            })
+    },
+
     //añadir un user
     adduser (state, { text }) {
         state.users.push({
@@ -13,7 +23,7 @@ export const mutations = {
     },
  
     //eliminar un user
-    deleteuser (state, { user }) {
+    deleteUser (state, { user }) {
         state.users.splice(state.users.indexOf(user), 1)
     },
  

@@ -7,10 +7,10 @@
         <span class="label label-default">act</span>
         </td>
         <td>
-        <button v-on:click="authUser(user._id)" class="btn btn-danger btn-xs">
+        <button @click="deleteUser({ user: user })" class="btn btn-danger btn-xs">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         </button>
-        <button v-on:click="editMessage(user._id)" class="btn btn-success btn-xs">
+        <button @click="editUser(user._id)" class="btn btn-success btn-xs">
             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
         </button>
         </td>
@@ -26,7 +26,25 @@
         }
     },
     methods: {
-
+        doneEdit (e) {
+            const value = e.target.value.trim()
+            const { todo } = this
+            if (!value) {
+                this.$store.commit('deleteUser')({
+                    todo
+                })
+            } else if (this.editing) {
+                this.$store.commit('editUser')({
+                    todo,
+                    value
+                })
+                this.editing = false
+            }
+        },
+        cancelEdit (e) {
+            e.target.value = this.todo.text
+            this.editing = false
+        }
     }
  }
 </script>
