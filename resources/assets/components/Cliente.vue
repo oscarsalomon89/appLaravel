@@ -4,7 +4,7 @@
         <td>{{user.username}}</td>
         <td>{{ user.email }}</td>
         <td>
-        <span class="label label-default">act</span>
+        <span class="label label-default">{{ $store.state.count }}</span>
         </td>
         <td>
         <button @click="deleteUser({ user: user })" class="btn btn-danger btn-xs">
@@ -17,15 +17,22 @@
     </tr>
 </template>
 <script>
+import { mapMutations } from 'vuex'
+
  export default {
     name: 'Cliente',
     props: ['user'],
     data() {
         return {
-        editing: false
+            editing: false
         }
     },
     methods: {
+        /*...mapMutations([
+            'editTodo',
+            'toggleTodo',
+            'deleteTodo'
+            ]),*/
         doneEdit (e) {
             const value = e.target.value.trim()
             const { todo } = this

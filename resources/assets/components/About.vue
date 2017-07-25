@@ -3,10 +3,11 @@
   <Navbar></Navbar>
   <!-- Default panel contents -->
   <div class="panel-heading">Panel heading</div>
-  <div class="panel-body">
-    <p>Esta es la historia de vue js</p>
-  </div>
-
+  <p>{{ $store.state.count }} times, count is {{ evenOrOdd }}.</p>
+  <p>
+    <button @click="increment">+</button>
+    <button @click="decrement">-</button>
+  </p>
   <!-- List group -->
   <ul class="list-group">
     <li class="list-group-item">Cras justo odio</li>
@@ -18,9 +19,19 @@
 </div>
 </template>
 <script>
-  import Navbar from './Navbar.vue';
+  import Navbar from './Navbar.vue'
+  import { mapGetters, mapActions } from 'vuex'
 
   export default {
-    components: { 'Navbar': Navbar }
+    components: { 'Navbar': Navbar },
+    computed: mapGetters([
+      'evenOrOdd'
+    ]),
+    methods: mapActions([
+      'increment',
+      'decrement',
+      'incrementIfOdd',
+      'incrementAsync'
+    ])
   }
 </script>

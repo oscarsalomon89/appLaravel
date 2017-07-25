@@ -1,17 +1,17 @@
 //inicializamos el estado de los users
-import Vue from 'vue'
-
 export const state = {
-    users: []
+    users: [],
+    count: 0
 }
  
 export const mutations = {
     //obtener usuarios
-    getUsers () {
-        Vue.http.get('/api/users')
-        .then(function(res){
-                state.users = res.data;
-            })
+    increment (state) {
+        state.count++
+    },
+
+    decrement (state) {
+        state.count--
     },
 
     //añadir un user
