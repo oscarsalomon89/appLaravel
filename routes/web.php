@@ -15,7 +15,7 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/inicio', 'HomeController@index')->name('clientes');
+Route::get('/inicio', 'HomeController@index');
 
 Route::group(['middleware' => ['api']], function () {
     Route::post('/api/register','Auth\AuthController@register');
@@ -31,9 +31,10 @@ Route::group(['middleware' => ['api']], function () {
 //Auth::routes();
 /*Route::post('/login','Auth\LoginController@login');
 Route::get('/logout','Auth\LoginController@logOut');*/
-Route::get('/clientes', 'HomeController@index')->name('clientes');
-
+Route::get('/clientes', 'HomeController@index');
 Route::get('/login','HomeController@index');
 Route::get('/signup','HomeController@index');
 Route::get('/about','HomeController@index');
+Route::get('/pedidos','HomeController@index');
+
 Route::get('/api/users','UserController@getUsers');
