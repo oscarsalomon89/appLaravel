@@ -10775,24 +10775,11 @@ module.exports = Vue$3;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-/**
- * Mocking client-server processing
- */
-var _products = [{ "id": 1, "title": "iPad 4 Mini", "price": 500.01, "inventory": 2 }, { "id": 2, "title": "H&M T-Shirt White", "price": 10.99, "inventory": 10 }, { "id": 3, "title": "Charli XCX - Sucker CD", "price": 19.99, "inventory": 5 }];
-
-exports.default = {
-  getProducts: function getProducts(cb) {
-    setTimeout(function () {
-      return cb(_products);
-    }, 100);
-  },
-  buyProducts: function buyProducts(products, cb, errorCb) {
-    setTimeout(function () {
-      // simulate random checkout failure.
-      Math.random() > 0.5 || navigator.userAgent.indexOf('PhantomJS') > -1 ? cb() : errorCb();
-    }, 100);
-  }
-};
+var ADD_TO_CART = exports.ADD_TO_CART = 'ADD_TO_CART';
+var CHECKOUT_REQUEST = exports.CHECKOUT_REQUEST = 'CHECKOUT_REQUEST';
+var CHECKOUT_SUCCESS = exports.CHECKOUT_SUCCESS = 'CHECKOUT_SUCCESS';
+var CHECKOUT_FAILURE = exports.CHECKOUT_FAILURE = 'CHECKOUT_FAILURE';
+var RECEIVE_PRODUCTS = exports.RECEIVE_PRODUCTS = 'RECEIVE_PRODUCTS';
 
 /***/ }),
 /* 6 */
@@ -10804,11 +10791,30 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var ADD_TO_CART = exports.ADD_TO_CART = 'ADD_TO_CART';
-var CHECKOUT_REQUEST = exports.CHECKOUT_REQUEST = 'CHECKOUT_REQUEST';
-var CHECKOUT_SUCCESS = exports.CHECKOUT_SUCCESS = 'CHECKOUT_SUCCESS';
-var CHECKOUT_FAILURE = exports.CHECKOUT_FAILURE = 'CHECKOUT_FAILURE';
-var RECEIVE_PRODUCTS = exports.RECEIVE_PRODUCTS = 'RECEIVE_PRODUCTS';
+
+var _vue = __webpack_require__(4);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  getProducts: function getProducts(cb) {
+    _vue2.default.http.get('api/products').then(function (response) {
+      cb(response.data);
+    }, function (response) {
+      cb([]);
+    });
+  },
+  buyProducts: function buyProducts(products, cb, errorCb) {
+    setTimeout(function () {
+      // simulate random checkout failure.
+      Math.random() > 0.5 || navigator.userAgent.indexOf('PhantomJS') > -1 ? cb() : errorCb();
+    }, 100);
+  }
+}; /**
+    * Mocking client-server processing
+    */
 
 /***/ }),
 /* 7 */
@@ -12073,7 +12079,6 @@ exports.default = {
 //
 //
 //
-//
 
 /***/ }),
 /* 24 */
@@ -12179,7 +12184,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.addToCart = undefined;
 
-var _mutationTypes = __webpack_require__(6);
+var _mutationTypes = __webpack_require__(5);
 
 var types = _interopRequireWildcard(_mutationTypes);
 
@@ -12188,11 +12193,9 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 var addToCart = exports.addToCart = function addToCart(_ref, product) {
   var commit = _ref.commit;
 
-  if (product.inventory > 0) {
-    commit(types.ADD_TO_CART, {
-      id: product.id
-    });
-  }
+  commit(types.ADD_TO_CART, {
+    id: product.id
+  });
 }; // actions are functions that cause side effects and can involve
 // asynchronous operations.
 
@@ -12215,7 +12218,7 @@ var cartProducts = exports.cartProducts = function cartProducts(state) {
       return p.id === id;
     });
     return {
-      title: product.title,
+      title: product.name,
       price: product.price,
       quantity: quantity
     };
@@ -12235,11 +12238,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _mutations;
 
-var _shop = __webpack_require__(5);
+var _shop = __webpack_require__(6);
 
 var _shop2 = _interopRequireDefault(_shop);
 
-var _mutationTypes = __webpack_require__(6);
+var _mutationTypes = __webpack_require__(5);
 
 var types = _interopRequireWildcard(_mutationTypes);
 
@@ -12331,11 +12334,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _mutations;
 
-var _shop = __webpack_require__(5);
+var _shop = __webpack_require__(6);
 
 var _shop2 = _interopRequireDefault(_shop);
 
-var _mutationTypes = __webpack_require__(6);
+var _mutationTypes = __webpack_require__(5);
 
 var types = _interopRequireWildcard(_mutationTypes);
 
@@ -14913,10 +14916,7 @@ if (false) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('ul', _vm._l((_vm.products), function(p) {
-    return _c('li', [_vm._v("\n    " + _vm._s(p.title) + " - " + _vm._s(_vm._f("currency")(p.price)) + "\n    "), _c('br'), _vm._v(" "), _c('button', {
-      attrs: {
-        "disabled": !p.inventory
-      },
+    return _c('li', [_vm._v("\n    " + _vm._s(p.name) + " - " + _vm._s(_vm._f("currency")(p.price)) + "\n    "), _c('br'), _vm._v(" "), _c('button', {
       on: {
         "click": function($event) {
           _vm.addToCart(p)

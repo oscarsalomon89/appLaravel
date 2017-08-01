@@ -38,3 +38,4 @@ Route::get('/about','HomeController@index');
 Route::get('/pedidos','HomeController@index');
 
 Route::get('/api/users','UserController@getUsers');
+Route::get('/api/products','ProductController@getProducts');
