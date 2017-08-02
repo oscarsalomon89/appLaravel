@@ -4,6 +4,7 @@
   <div class="page-header">
     <h1>Clientes <small>Subtext for header</small></h1>
     <button class="btn btn-primary" v-on:click="openAddUser()">Add User!</button>
+    <p v-show="addStatus">Checkout {{ addStatus }}.</p>
     <div class="row">
       <div class="col-md-3">
 
@@ -25,27 +26,21 @@
   </div>
 </template>
 <script>
+  import { mapGetters, mapActions } from 'vuex'
   import Navbar from './Navbar.vue'
   import Cliente from './Cliente.vue'
   import swal from 'sweetalert2'
 
   export default {
-    components: {'Navbar': Navbar,'Cliente':Cliente},
-    data() {
-      return {
-        listUsers: []
-      }
-    },
-    created: function () {
-      this.getUsers();      
-    },
-    methods: {
-      getUsers () {
-        this.$http.get('/api/users')
-        .then(function(res){
-                this.listUsers = res.data;
-            })
+    components: {Navbar, Cliente},
+      computed: mapGetters({
+        listUsers: 'allClients',
+        addStatus: 'addStatus'
+      }),
+      created () {
+        this.$store.dispatch('getAllClients')
       },
+    methods: {
       openAddUser(){
         let vm = this;
         var form = '<form class="form-horizontal">'
@@ -89,7 +84,15 @@
                         password: document.getElementById('inputPassword').value
                         };
 
-                      vm.$http.post('api/register', data)
+                        vm.$store.dispatch('addClient', data)
+
+                        if(vm.addStatus == 'successful'){
+                          resolve();
+                          vm.$store.dispatch('getAllClients')
+                        }else{
+                          reject('error');
+                        }
+                      /*vm.$http.post('api/register', data)
                           .then(function(res){
                                 resolve();
                                 vm.getUsers();             
@@ -97,7 +100,7 @@
                                 if (response.status ==422){
                                     reject(response.body.email[0]);
                                 }
-                          })
+                          })*/
                   }
               })
             }         
