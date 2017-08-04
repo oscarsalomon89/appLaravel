@@ -85,22 +85,13 @@
                         };
 
                         vm.$store.dispatch('addClient', data)
-
-                        if(vm.addStatus == 'successful'){
-                          resolve();
-                          vm.$store.dispatch('getAllClients')
-                        }else{
-                          reject('error');
-                        }
-                      /*vm.$http.post('api/register', data)
-                          .then(function(res){
-                                resolve();
-                                vm.getUsers();             
+                            .then(function(res){
+                                resolve();           
                               }, function(response){
                                 if (response.status ==422){
                                     reject(response.body.email[0]);
                                 }
-                          })*/
+                          })
                   }
               })
             }         

@@ -39,3 +39,4 @@ Route::get('/pedidos','HomeController@index');
 
 Route::get('/api/users','UserController@getUsers');
 Route::get('/api/products','ProductController@getProducts');
+Route::get('/api/deleteUser','UserController@deleteUser');

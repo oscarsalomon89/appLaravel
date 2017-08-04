@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -30,5 +31,10 @@ class UserController extends Controller
     public function getUsers(){
         $users = DB::table('users')->get();
         return $users;
+    }
+
+    public function deleteUser(Request $request){
+        $res = User::destroy($request->id);
+        return $res;
     }
 }

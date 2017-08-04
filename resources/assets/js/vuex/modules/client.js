@@ -24,9 +24,15 @@ const actions = {
   addClient ({ commit, state }, data) {
     clients.addClient(
       data,
-      () => commit(types.ADD_SUCCESS),
+      client => { commit(types.ADD_SUCCESS, { client })},
       () => commit(types.ADD_FAILURE)
     )
+  },
+
+  deleteClient ({ commit }, data) {
+    clients.deleteClient(data, client => {
+      commit(types.DELETE_SUCCESS, { client })
+    })
   }
 }
 
@@ -36,7 +42,13 @@ const mutations = {
     state.all = clients
   },
 
-  [types.ADD_SUCCESS] (state) {
+  [types.ADD_SUCCESS] (state, { client }) {
+    state.all.push(client)
+    state.addStatus = 'successful'
+  },
+
+  [types.DELETE_SUCCESS] (state, { client }) {
+    //state.all.push(client)
     state.addStatus = 'successful'
   },
 

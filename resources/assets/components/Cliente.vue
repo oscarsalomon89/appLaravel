@@ -7,17 +7,17 @@
         <span class="label label-default">{{ $store.state.count }}</span>
         </td>
         <td>
-        <button @click="deleteUser({ user: user })" class="btn btn-danger btn-xs">
+        <button @click="deleteUser(user.id)" class="btn btn-danger btn-xs">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         </button>
-        <button @click="editUser(user._id)" class="btn btn-success btn-xs">
+        <button @click="editUser(user.id)" class="btn btn-success btn-xs">
             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
         </button>
         </td>
     </tr>
 </template>
 <script>
-import { mapMutations } from 'vuex'
+//import { mapActions } from 'vuex'
 
  export default {
     name: 'Cliente',
@@ -28,11 +28,9 @@ import { mapMutations } from 'vuex'
         }
     },
     methods: {
-        /*...mapMutations([
-            'editTodo',
-            'toggleTodo',
-            'deleteTodo'
-            ]),*/
+        deleteUser(user){
+            this.$store.dispatch('deleteClient',user)
+        },
         doneEdit (e) {
             const value = e.target.value.trim()
             const { todo } = this
