@@ -17,7 +17,7 @@
     </tr>
 </template>
 <script>
-//import { mapActions } from 'vuex'
+import swal from 'sweetalert2'
 
  export default {
     name: 'Cliente',
@@ -29,7 +29,39 @@
     },
     methods: {
         deleteUser(user){
-            this.$store.dispatch('deleteClient',user)
+            var data = { id: user };
+            let vm = this;
+
+            swal({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: function () {
+                    return new Promise(function (resolve, reject) {
+                        vm.$store.dispatch('deleteClient',data)
+                            .then(function(res){
+                                    resolve(); 
+                                    vm.$store.dispatch('getAllClients')          
+                                }, function(response){
+                                if (response.status ==422){
+                                    
+                                }
+                            })
+                    })
+                },
+                allowOutsideClick: false
+                }).then(function (email) {
+                swal({
+                    type: 'success',
+                    title: 'Exito!',
+                    html: 'Cliente eliminado'
+                })
+                })
+
+            
         },
         doneEdit (e) {
             const value = e.target.value.trim()

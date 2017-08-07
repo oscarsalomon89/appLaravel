@@ -9,8 +9,8 @@
       <div class="col-md-3">
 
       </div>
-      <div class="col-md-6">
-          <table class="table table-bordered">
+      <div class="col-md-6 jumbotron">
+          <table class="table table-striped">
             <tr>
                 <th>#</th>
                 <th>User</th>

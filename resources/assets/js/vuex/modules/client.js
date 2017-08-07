@@ -30,9 +30,7 @@ const actions = {
   },
 
   deleteClient ({ commit }, data) {
-    clients.deleteClient(data, client => {
-      commit(types.DELETE_SUCCESS, { client })
-    })
+    clients.deleteClient(data)
   }
 }
 

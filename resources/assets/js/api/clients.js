@@ -22,7 +22,7 @@ export default {
   },
 
   deleteClient (data, cb) {
-    Vue.http.post('api/deleteUser', {data})
+    Vue.http.post('api/deleteUser', data)
         .then(function(res){
             cb(res.body)             
             }, function(response){

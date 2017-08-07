@@ -9823,6 +9823,136 @@ module.exports = Vue$3;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _vue = __webpack_require__(1);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _router = __webpack_require__(7);
+
+var _router2 = _interopRequireDefault(_router);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    user: {
+        authenticated: false,
+        rol: null,
+        profile: null
+    },
+    check: function check() {
+        var _this = this;
+
+        if (localStorage.getItem('id_token') !== null) {
+            _vue2.default.http.get('api/user').then(function (response) {
+                _this.user.authenticated = true;
+                _this.user.profile = response.data.data;
+                _this.user.rol = response.data.data['rol'];
+            }, function (response) {
+                localStorage.removeItem('id_token');
+                _this.user.authenticated = false;
+                _this.user.profile = null;
+                _this.user.rol = null;
+                _router2.default.push('login');
+            });
+        } else {
+            _router2.default.push('login');
+        }
+    },
+    islogin: function islogin(to, from, next) {
+        if (localStorage.getItem('id_token') !== null) {
+            _vue2.default.http.get('api/user').then(function (response) {
+                _router2.default.push('inicio');
+            }, function (response) {
+                next();
+            });
+        } else {
+            next();
+        }
+    },
+    register: function register(context, name, email, password) {
+        _vue2.default.http.post('api/register', {
+            name: name,
+            email: email,
+            password: password
+        }).then(function (response) {
+            context.success = true;
+        }, function (response) {
+            context.response = response.data;
+            context.error = true;
+        });
+    },
+    signin: function signin(context, user, password) {
+        var _this2 = this;
+
+        _vue2.default.http.post('api/signin', {
+            name: user,
+            password: password
+        }).then(function (response) {
+            context.error = false;
+            localStorage.setItem('id_token', response.data.meta.token);
+            _vue2.default.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
+            _this2.user.authenticated = true;
+            _this2.user.profile = response.data.data;
+            _this2.user.rol = response.data.data['rol'];
+            _router2.default.push('inicio');
+        }, function (response) {
+            context.error = true;
+        });
+    },
+    signout: function signout() {
+        localStorage.removeItem('id_token');
+        this.user.authenticated = false;
+        this.user.profile = null;
+        this.user.rol = null;
+        _router2.default.push('login');
+    }
+};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(0)(
+  /* script */
+  __webpack_require__(21),
+  /* template */
+  __webpack_require__(60),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\Navbar.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] Navbar.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-fb383640", Component.options)
+  } else {
+    hotAPI.reload("data-v-fb383640", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10636,136 +10766,6 @@ var index_esm = {
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _vue = __webpack_require__(1);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-var _router = __webpack_require__(7);
-
-var _router2 = _interopRequireDefault(_router);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    user: {
-        authenticated: false,
-        rol: null,
-        profile: null
-    },
-    check: function check() {
-        var _this = this;
-
-        if (localStorage.getItem('id_token') !== null) {
-            _vue2.default.http.get('api/user').then(function (response) {
-                _this.user.authenticated = true;
-                _this.user.profile = response.data.data;
-                _this.user.rol = response.data.data['rol'];
-            }, function (response) {
-                localStorage.removeItem('id_token');
-                _this.user.authenticated = false;
-                _this.user.profile = null;
-                _this.user.rol = null;
-                _router2.default.push('login');
-            });
-        } else {
-            _router2.default.push('login');
-        }
-    },
-    islogin: function islogin(to, from, next) {
-        if (localStorage.getItem('id_token') !== null) {
-            _vue2.default.http.get('api/user').then(function (response) {
-                _router2.default.push('inicio');
-            }, function (response) {
-                next();
-            });
-        } else {
-            next();
-        }
-    },
-    register: function register(context, name, email, password) {
-        _vue2.default.http.post('api/register', {
-            name: name,
-            email: email,
-            password: password
-        }).then(function (response) {
-            context.success = true;
-        }, function (response) {
-            context.response = response.data;
-            context.error = true;
-        });
-    },
-    signin: function signin(context, user, password) {
-        var _this2 = this;
-
-        _vue2.default.http.post('api/signin', {
-            name: user,
-            password: password
-        }).then(function (response) {
-            context.error = false;
-            localStorage.setItem('id_token', response.data.meta.token);
-            _vue2.default.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
-            _this2.user.authenticated = true;
-            _this2.user.profile = response.data.data;
-            _this2.user.rol = response.data.data['rol'];
-            _router2.default.push('inicio');
-        }, function (response) {
-            context.error = true;
-        });
-    },
-    signout: function signout() {
-        localStorage.removeItem('id_token');
-        this.user.authenticated = false;
-        this.user.profile = null;
-        this.user.rol = null;
-        _router2.default.push('login');
-    }
-};
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Component = __webpack_require__(0)(
-  /* script */
-  __webpack_require__(21),
-  /* template */
-  __webpack_require__(60),
-  /* scopeId */
-  null,
-  /* cssModules */
-  null
-)
-Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\Navbar.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
-if (Component.options.functional) {console.error("[vue-loader] Navbar.vue: functional components are not supported with templates, they should use render functions.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-fb383640", Component.options)
-  } else {
-    hotAPI.reload("data-v-fb383640", Component.options)
-  }
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10845,7 +10845,7 @@ var _vueResource = __webpack_require__(61);
 
 var _vueResource2 = _interopRequireDefault(_vueResource);
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(2);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -11261,11 +11261,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(4);
+var _Navbar = __webpack_require__(3);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
-var _vuex = __webpack_require__(2);
+var _vuex = __webpack_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11307,7 +11307,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(2);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -11356,7 +11356,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 //
 //
 
-var _vuex = __webpack_require__(2);
+var _vuex = __webpack_require__(4);
 
 exports.default = {
   computed: _extends({}, (0, _vuex.mapGetters)({
@@ -11386,26 +11386,12 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
-//import { mapActions } from 'vuex'
+var _sweetalert = __webpack_require__(35);
+
+var _sweetalert2 = _interopRequireDefault(_sweetalert);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
     name: 'Cliente',
@@ -11418,7 +11404,34 @@ exports.default = {
 
     methods: {
         deleteUser: function deleteUser(user) {
-            this.$store.dispatch('deleteClient', user);
+            var data = { id: user };
+            var vm = this;
+
+            (0, _sweetalert2.default)({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: function preConfirm() {
+                    return new Promise(function (resolve, reject) {
+                        vm.$store.dispatch('deleteClient', data).then(function (res) {
+                            resolve();
+                            vm.$store.dispatch('getAllClients');
+                        }, function (response) {
+                            if (response.status == 422) {}
+                        });
+                    });
+                },
+                allowOutsideClick: false
+            }).then(function (email) {
+                (0, _sweetalert2.default)({
+                    type: 'success',
+                    title: 'Exito!',
+                    html: 'Cliente eliminado'
+                });
+            });
         },
         doneEdit: function doneEdit(e) {
             var value = e.target.value.trim();
@@ -11441,7 +11454,24 @@ exports.default = {
             this.editing = false;
         }
     }
-};
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /***/ }),
 /* 16 */
@@ -11454,9 +11484,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _vuex = __webpack_require__(2);
+var _vuex = __webpack_require__(4);
 
-var _Navbar = __webpack_require__(4);
+var _Navbar = __webpack_require__(3);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11565,7 +11595,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(4);
+var _Navbar = __webpack_require__(3);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11649,7 +11679,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(4);
+var _Navbar = __webpack_require__(3);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11799,7 +11829,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(2);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -11954,7 +11984,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(2);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -12027,7 +12057,7 @@ var _Cart = __webpack_require__(38);
 
 var _Cart2 = _interopRequireDefault(_Cart);
 
-var _Navbar = __webpack_require__(4);
+var _Navbar = __webpack_require__(3);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -12059,7 +12089,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _vuex = __webpack_require__(2);
+var _vuex = __webpack_require__(4);
 
 exports.default = {
   computed: (0, _vuex.mapGetters)({
@@ -12094,7 +12124,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _auth = __webpack_require__(3);
+var _auth = __webpack_require__(2);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -12183,7 +12213,7 @@ exports.default = {
         });
     },
     deleteClient: function deleteClient(data, cb) {
-        _vue2.default.http.post('api/deleteUser', { data: data }).then(function (res) {
+        _vue2.default.http.post('api/deleteUser', data).then(function (res) {
             cb(res.body);
         }, function (response) {
             if (response.status == 422) {}
@@ -12432,9 +12462,7 @@ var actions = {
   deleteClient: function deleteClient(_ref3, data) {
     var commit = _ref3.commit;
 
-    _clients2.default.deleteClient(data, function (client) {
-      commit(types.DELETE_SUCCESS, { client: client });
-    });
+    _clients2.default.deleteClient(data);
   }
 };
 
@@ -12552,7 +12580,7 @@ var _vue = __webpack_require__(1);
 
 var _vue2 = _interopRequireDefault(_vue);
 
-var _vuex = __webpack_require__(2);
+var _vuex = __webpack_require__(4);
 
 var _vuex2 = _interopRequireDefault(_vuex);
 
@@ -14697,9 +14725,9 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_c('div', {
     staticClass: "col-md-3"
   }), _vm._v(" "), _c('div', {
-    staticClass: "col-md-6"
+    staticClass: "col-md-6 jumbotron"
   }, [_c('table', {
-    staticClass: "table table-bordered"
+    staticClass: "table table-striped"
   }, [_vm._m(1), _vm._v(" "), _vm._l((_vm.listUsers), function(item) {
     return _c('cliente', {
       key: item._id,
