@@ -1,7 +1,7 @@
 <template>
     <tr>
         <th scope="row">{{user.id}}</th>
-        <td>{{user.username}}</td>
+        <td>{{user.name}}</td>
         <td>{{ user.email }}</td>
         <td>
         <span class="label label-default">{{ $store.state.count }}</span>
@@ -10,7 +10,7 @@
         <button @click="deleteUser(user.id)" class="btn btn-danger btn-xs">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         </button>
-        <button @click="editUser(user.id)" class="btn btn-success btn-xs">
+        <button @click="editUser(user)" class="btn btn-success btn-xs">
             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
         </button>
         </td>
@@ -63,20 +63,67 @@ import swal from 'sweetalert2'
 
             
         },
-        doneEdit (e) {
-            const value = e.target.value.trim()
-            const { todo } = this
-            if (!value) {
-                this.$store.commit('deleteUser')({
-                    todo
+        editUser (user) {
+            let vm = this;
+            var form = '<form class="form-horizontal">'
+                        +'<div class="form-group">'
+                        +'<label for="inputUser" class="col-sm-4 control-label">Usuario</label>'
+                        +'<div class="col-sm-8">'
+                            +'<input type="text" value="'+user.name+'" class="form-control" id="inputUser" placeholder="Nombre usuario">'
+                        +'</div>'
+                        +'</div>'
+                        +'<div class="form-group">'
+                        +'<label for="inputEmail" class="col-sm-4 control-label">Email</label>'
+                        +'<div class="col-sm-8">'
+                            +'<input type="email" value="'+user.email+'" class="form-control" id="inputEmail" placeholder="Email">'
+                        +'</div>'
+                        +'</div>'
+                        +'<div class="form-group">'
+                        +'<label for="inputPassword" class="col-sm-4 control-label">Password</label>'
+                        +'<div class="col-sm-8">'
+                            +'<input type="password" value="" class="form-control" id="inputPassword" placeholder="Password">'
+                        +'</div>'
+                        +'</div>'                        
+                    +'</form>';
+            swal({
+                title: 'Editar Cliente',
+                html: form,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+                preConfirm: function () {
+                return new Promise(function (resolve, reject) {
+                    var user = document.getElementById('inputUser').value;
+                    var email = document.getElementById('inputEmail').value;
+                    var pass = document.getElementById('inputPassword').value;
+                    if (email === '' || user==='' || pass == '') {
+                        reject('Datos incompletos')
+                    } else {
+                        var data = {
+                            name: document.getElementById('inputUser').value,
+                            email: document.getElementById('inputEmail').value,
+                            password: document.getElementById('inputPassword').value
+                            };
+
+                            vm.$store.dispatch('addClient', data)
+                                .then(function(res){
+                                    resolve();           
+                                }, function(response){
+                                    if (response.status ==422){
+                                        reject(response.body.email[0]);
+                                    }
+                            })
+                    }
                 })
-            } else if (this.editing) {
-                this.$store.commit('editUser')({
-                    todo,
-                    value
-                })
-                this.editing = false
-            }
+                }         
+            }).then(function() {
+                swal({
+                        type: 'success',
+                        title: 'Exito!',
+                        html: 'El usuario se agrego correctamente'
+                    })                         
+            })
         },
         cancelEdit (e) {
             e.target.value = this.todo.text

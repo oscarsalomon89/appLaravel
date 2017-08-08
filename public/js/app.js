@@ -9923,7 +9923,7 @@ exports.default = {
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(21),
+  __webpack_require__(22),
   /* template */
   __webpack_require__(60),
   /* scopeId */
@@ -10987,1655 +10987,6 @@ module.exports = function() {
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-var listToStyles = __webpack_require__(65)
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-module.exports = function (parentId, list, _isProduction) {
-  isProduction = _isProduction
-
-  var styles = listToStyles(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = listToStyles(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[data-vue-ssr-id~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _vue = __webpack_require__(1);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-var _App = __webpack_require__(37);
-
-var _App2 = _interopRequireDefault(_App);
-
-var _router = __webpack_require__(7);
-
-var _router2 = _interopRequireDefault(_router);
-
-var _store = __webpack_require__(32);
-
-var _store2 = _interopRequireDefault(_store);
-
-var _currency = __webpack_require__(26);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_vue2.default.filter('currency', _currency.currency);
-
-var app = new _vue2.default({
-    el: '#app',
-    router: _router2.default,
-    store: _store2.default,
-    render: function render(h) {
-        return h(_App2.default);
-    }
-});
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Navbar = __webpack_require__(3);
-
-var _Navbar2 = _interopRequireDefault(_Navbar);
-
-var _vuex = __webpack_require__(4);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-exports.default = {
-  components: { 'Navbar': _Navbar2.default },
-  computed: (0, _vuex.mapGetters)(['evenOrOdd']),
-  methods: (0, _vuex.mapActions)(['increment', 'decrement', 'incrementIfOdd', 'incrementAsync'])
-};
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _auth = __webpack_require__(2);
-
-var _auth2 = _interopRequireDefault(_auth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    data: function data() {
-        return {
-            listUsers: [],
-            messageFinal: ''
-        };
-    },
-    beforeCreate: function beforeCreate() {
-        _auth2.default.check();
-    }
-}; //
-//
-//
-//
-//
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-var _vuex = __webpack_require__(4);
-
-exports.default = {
-  computed: _extends({}, (0, _vuex.mapGetters)({
-    products: 'cartProducts',
-    checkoutStatus: 'checkoutStatus'
-  }), {
-    total: function total() {
-      return this.products.reduce(function (total, p) {
-        return total + p.price * p.quantity;
-      }, 0);
-    }
-  }),
-  methods: {
-    checkout: function checkout(products) {
-      this.$store.dispatch('checkout', products);
-    }
-  }
-};
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _sweetalert = __webpack_require__(35);
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    name: 'Cliente',
-    props: ['user'],
-    data: function data() {
-        return {
-            editing: false
-        };
-    },
-
-    methods: {
-        deleteUser: function deleteUser(user) {
-            var data = { id: user };
-            var vm = this;
-
-            (0, _sweetalert2.default)({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Submit',
-                showLoaderOnConfirm: true,
-                preConfirm: function preConfirm() {
-                    return new Promise(function (resolve, reject) {
-                        vm.$store.dispatch('deleteClient', data).then(function (res) {
-                            resolve();
-                            vm.$store.dispatch('getAllClients');
-                        }, function (response) {
-                            if (response.status == 422) {}
-                        });
-                    });
-                },
-                allowOutsideClick: false
-            }).then(function (email) {
-                (0, _sweetalert2.default)({
-                    type: 'success',
-                    title: 'Exito!',
-                    html: 'Cliente eliminado'
-                });
-            });
-        },
-        doneEdit: function doneEdit(e) {
-            var value = e.target.value.trim();
-            var todo = this.todo;
-
-            if (!value) {
-                this.$store.commit('deleteUser')({
-                    todo: todo
-                });
-            } else if (this.editing) {
-                this.$store.commit('editUser')({
-                    todo: todo,
-                    value: value
-                });
-                this.editing = false;
-            }
-        },
-        cancelEdit: function cancelEdit(e) {
-            e.target.value = this.todo.text;
-            this.editing = false;
-        }
-    }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _vuex = __webpack_require__(4);
-
-var _Navbar = __webpack_require__(3);
-
-var _Navbar2 = _interopRequireDefault(_Navbar);
-
-var _Cliente = __webpack_require__(39);
-
-var _Cliente2 = _interopRequireDefault(_Cliente);
-
-var _sweetalert = __webpack_require__(35);
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-exports.default = {
-  components: { Navbar: _Navbar2.default, Cliente: _Cliente2.default },
-  computed: (0, _vuex.mapGetters)({
-    listUsers: 'allClients',
-    addStatus: 'addStatus'
-  }),
-  created: function created() {
-    this.$store.dispatch('getAllClients');
-  },
-
-  methods: {
-    openAddUser: function openAddUser() {
-      var vm = this;
-      var form = '<form class="form-horizontal">' + '<div class="form-group">' + '<label for="inputUser" class="col-sm-4 control-label">Usuario</label>' + '<div class="col-sm-8">' + '<input type="text" class="form-control" id="inputUser" placeholder="Nombre usuario">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputPassword" class="col-sm-4 control-label">Password</label>' + '<div class="col-sm-8">' + '<input type="password" class="form-control" id="inputPassword" placeholder="Password">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputEmail" class="col-sm-4 control-label">Email</label>' + '<div class="col-sm-8">' + '<input type="email" class="form-control" id="inputEmail" placeholder="Email">' + '</div>' + '</div>' + '</form>';
-      (0, _sweetalert2.default)({
-        title: 'Nuevo Cliente',
-        html: form,
-        showCancelButton: true,
-        confirmButtonText: 'Guardar',
-        showLoaderOnConfirm: true,
-        allowOutsideClick: false,
-        preConfirm: function preConfirm() {
-          return new Promise(function (resolve, reject) {
-            var user = document.getElementById('inputUser').value;
-            var email = document.getElementById('inputEmail').value;
-            var pass = document.getElementById('inputPassword').value;
-            if (email === '' || user === '' || pass == '') {
-              reject('Datos incompletos');
-            } else {
-              var data = {
-                name: document.getElementById('inputUser').value,
-                email: document.getElementById('inputEmail').value,
-                password: document.getElementById('inputPassword').value
-              };
-
-              vm.$store.dispatch('addClient', data).then(function (res) {
-                resolve();
-              }, function (response) {
-                if (response.status == 422) {
-                  reject(response.body.email[0]);
-                }
-              });
-            }
-          });
-        }
-      }).then(function () {
-        (0, _sweetalert2.default)({
-          type: 'success',
-          title: 'Exito!',
-          html: 'El usuario se agrego correctamente'
-        });
-      });
-    }
-  }
-};
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Navbar = __webpack_require__(3);
-
-var _Navbar2 = _interopRequireDefault(_Navbar);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  components: { 'Navbar': _Navbar2.default }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-exports.default = {
-    data: function data() {
-        return {
-            message: 'I am an example component!'
-        };
-    }
-};
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Navbar = __webpack_require__(3);
-
-var _Navbar2 = _interopRequireDefault(_Navbar);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  components: { 'Navbar': _Navbar2.default }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _auth = __webpack_require__(2);
-
-var _auth2 = _interopRequireDefault(_auth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  data: function data() {
-    return {
-      error: '',
-      token: document.getElementById('token').value,
-      user: '',
-      password: ''
-    };
-  },
-
-  methods: {
-    login: function login(event) {
-      event.preventDefault();
-      _auth2.default.signin(this, this.user, this.password);
-      /*var data = JSON.stringify(this.info);
-      this.$http.post('/login', data)
-      .then(function(res){
-            if(res.body.error){
-                this.error = res.body.msg;
-            }else{
-                var token = res.body.token;
-                localStorage.setItem('id_token',token);
-                this.auth = true;
-                this.$router.push('/inicio');
-            }
-          }, function(response){
-          console.log(response.data);
-       })*/
-    }
-  }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _auth = __webpack_require__(2);
-
-var _auth2 = _interopRequireDefault(_auth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  data: function data() {
-    return {
-      auth: _auth2.default
-    };
-  },
-
-  methods: {
-    logout: function logout() {
-      _auth2.default.signout();
-    }
-  }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _ProductList = __webpack_require__(46);
-
-var _ProductList2 = _interopRequireDefault(_ProductList);
-
-var _Cart = __webpack_require__(38);
-
-var _Cart2 = _interopRequireDefault(_Cart);
-
-var _Navbar = __webpack_require__(3);
-
-var _Navbar2 = _interopRequireDefault(_Navbar);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  components: { ProductList: _ProductList2.default, Cart: _Cart2.default, Navbar: _Navbar2.default }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _vuex = __webpack_require__(4);
-
-exports.default = {
-  computed: (0, _vuex.mapGetters)({
-    products: 'allProducts'
-  }),
-  methods: (0, _vuex.mapActions)(['addToCart']),
-  created: function created() {
-    this.$store.dispatch('getAllProducts');
-  }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _auth = __webpack_require__(2);
-
-var _auth2 = _interopRequireDefault(_auth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    data: function data() {
-        return {
-            name: null,
-            email: null,
-            password: null,
-            success: false,
-            error: false,
-            response: null
-        };
-    },
-
-    methods: {
-        register: function register(event) {
-            event.preventDefault();
-            _auth2.default.register(this, this.name, this.email, this.password);
-        }
-    }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _vue = __webpack_require__(1);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    getClients: function getClients(clientes) {
-        _vue2.default.http.get('api/users').then(function (response) {
-            clientes(response.data);
-        }, function (response) {
-            clientes([]);
-        });
-    },
-    addClient: function addClient(data, cb, errorCb) {
-        _vue2.default.http.post('api/register', data).then(function (res) {
-            cb(res.body.user);
-        }, function (response) {
-            if (response.status == 422) {
-                errorCb();
-            }
-        });
-    },
-    deleteClient: function deleteClient(data, cb) {
-        _vue2.default.http.post('api/deleteUser', data).then(function (res) {
-            cb(res.body);
-        }, function (response) {
-            if (response.status == 422) {}
-        });
-    }
-};
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.currency = currency;
-var digitsRE = /(\d{3})(?=\d)/g;
-
-function currency(value, currency, decimals) {
-  value = parseFloat(value);
-  if (!isFinite(value) || !value && value !== 0) return '';
-  currency = currency != null ? currency : '$';
-  decimals = decimals != null ? decimals : 2;
-  var stringified = Math.abs(value).toFixed(decimals);
-  var _int = decimals ? stringified.slice(0, -1 - decimals) : stringified;
-  var i = _int.length % 3;
-  var head = i > 0 ? _int.slice(0, i) + (_int.length > 3 ? ',' : '') : '';
-  var _float = decimals ? stringified.slice(-1 - decimals) : '';
-  var sign = value < 0 ? '-' : '';
-  return sign + currency + head + _int.slice(i).replace(digitsRE, '$1,') + _float;
-}
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.addToCart = undefined;
-
-var _mutationTypes = __webpack_require__(5);
-
-var types = _interopRequireWildcard(_mutationTypes);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-var addToCart = exports.addToCart = function addToCart(_ref, product) {
-  var commit = _ref.commit;
-
-  commit(types.ADD_TO_CART, {
-    id: product.id
-  });
-}; // actions are functions that cause side effects and can involve
-// asynchronous operations.
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var cartProducts = exports.cartProducts = function cartProducts(state) {
-  return state.cart.added.map(function (_ref) {
-    var id = _ref.id,
-        quantity = _ref.quantity;
-
-    var product = state.products.all.find(function (p) {
-      return p.id === id;
-    });
-    return {
-      title: product.name,
-      price: product.price,
-      quantity: quantity
-    };
-  });
-};
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _mutations;
-
-var _shop = __webpack_require__(6);
-
-var _shop2 = _interopRequireDefault(_shop);
-
-var _mutationTypes = __webpack_require__(5);
-
-var types = _interopRequireWildcard(_mutationTypes);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-// initial state
-// shape: [{ id, quantity }]
-var state = {
-  added: [],
-  checkoutStatus: null
-};
-
-// getters
-var getters = {
-  checkoutStatus: function checkoutStatus(state) {
-    return state.checkoutStatus;
-  }
-};
-
-// actions
-var actions = {
-  checkout: function checkout(_ref, products) {
-    var commit = _ref.commit,
-        state = _ref.state;
-
-    var savedCartItems = [].concat(_toConsumableArray(state.added));
-    commit(types.CHECKOUT_REQUEST);
-    _shop2.default.buyProducts(products, function () {
-      return commit(types.CHECKOUT_SUCCESS);
-    }, function () {
-      return commit(types.CHECKOUT_FAILURE, { savedCartItems: savedCartItems });
-    });
-  }
-};
-
-// mutations
-var mutations = (_mutations = {}, _defineProperty(_mutations, types.ADD_TO_CART, function (state, _ref2) {
-  var id = _ref2.id;
-
-  state.lastCheckout = null;
-  var record = state.added.find(function (p) {
-    return p.id === id;
-  });
-  if (!record) {
-    state.added.push({
-      id: id,
-      quantity: 1
-    });
-  } else {
-    record.quantity++;
-  }
-}), _defineProperty(_mutations, types.CHECKOUT_REQUEST, function (state) {
-  // clear cart
-  state.added = [];
-  state.checkoutStatus = null;
-}), _defineProperty(_mutations, types.CHECKOUT_SUCCESS, function (state) {
-  state.checkoutStatus = 'successful';
-}), _defineProperty(_mutations, types.CHECKOUT_FAILURE, function (state, _ref3) {
-  var savedCartItems = _ref3.savedCartItems;
-
-  // rollback to the cart saved before sending the request
-  state.added = savedCartItems;
-  state.checkoutStatus = 'failed';
-}), _mutations);
-
-exports.default = {
-  state: state,
-  getters: getters,
-  actions: actions,
-  mutations: mutations
-};
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _mutations;
-
-var _clients = __webpack_require__(25);
-
-var _clients2 = _interopRequireDefault(_clients);
-
-var _mutationTypes = __webpack_require__(5);
-
-var types = _interopRequireWildcard(_mutationTypes);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-// initial state
-var state = {
-  all: [],
-  addStatus: null
-};
-
-// getters
-var getters = {
-  allClients: function allClients(state) {
-    return state.all;
-  },
-  addStatus: function addStatus(state) {
-    return state.addStatus;
-  }
-};
-
-// actions
-var actions = {
-  getAllClients: function getAllClients(_ref) {
-    var commit = _ref.commit;
-
-    _clients2.default.getClients(function (clients) {
-      commit(types.RECEIVE_CLIENTS, { clients: clients });
-    });
-  },
-  addClient: function addClient(_ref2, data) {
-    var commit = _ref2.commit,
-        state = _ref2.state;
-
-    _clients2.default.addClient(data, function (client) {
-      commit(types.ADD_SUCCESS, { client: client });
-    }, function () {
-      return commit(types.ADD_FAILURE);
-    });
-  },
-  deleteClient: function deleteClient(_ref3, data) {
-    var commit = _ref3.commit;
-
-    _clients2.default.deleteClient(data);
-  }
-};
-
-// mutations
-var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIENTS, function (state, _ref4) {
-  var clients = _ref4.clients;
-
-  state.all = clients;
-}), _defineProperty(_mutations, types.ADD_SUCCESS, function (state, _ref5) {
-  var client = _ref5.client;
-
-  state.all.push(client);
-  state.addStatus = 'successful';
-}), _defineProperty(_mutations, types.DELETE_SUCCESS, function (state, _ref6) {
-  var client = _ref6.client;
-
-  //state.all.push(client)
-  state.addStatus = 'successful';
-}), _defineProperty(_mutations, types.ADD_FAILURE, function (state, _ref7) {
-  var savedCartItems = _ref7.savedCartItems;
-
-  // rollback to the cart saved before sending the request
-  state.addStatus = 'failed';
-}), _mutations);
-
-exports.default = {
-  state: state,
-  getters: getters,
-  actions: actions,
-  mutations: mutations
-};
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _mutations;
-
-var _shop = __webpack_require__(6);
-
-var _shop2 = _interopRequireDefault(_shop);
-
-var _mutationTypes = __webpack_require__(5);
-
-var types = _interopRequireWildcard(_mutationTypes);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-// initial state
-var state = {
-  all: []
-};
-
-// getters
-var getters = {
-  allProducts: function allProducts(state) {
-    return state.all;
-  }
-};
-
-// actions
-var actions = {
-  getAllProducts: function getAllProducts(_ref) {
-    var commit = _ref.commit;
-
-    _shop2.default.getProducts(function (products) {
-      commit(types.RECEIVE_PRODUCTS, { products: products });
-    });
-  }
-};
-
-// mutations
-var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_PRODUCTS, function (state, _ref2) {
-  var products = _ref2.products;
-
-  state.all = products;
-}), _defineProperty(_mutations, types.ADD_TO_CART, function (state, _ref3) {
-  var id = _ref3.id;
-
-  state.all.find(function (p) {
-    return p.id === id;
-  }).inventory--;
-}), _mutations);
-
-exports.default = {
-  state: state,
-  getters: getters,
-  actions: actions,
-  mutations: mutations
-};
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _vue = __webpack_require__(1);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-var _vuex = __webpack_require__(4);
-
-var _vuex2 = _interopRequireDefault(_vuex);
-
-var _actions = __webpack_require__(27);
-
-var actions = _interopRequireWildcard(_actions);
-
-var _getters = __webpack_require__(28);
-
-var getters = _interopRequireWildcard(_getters);
-
-var _cart = __webpack_require__(29);
-
-var _cart2 = _interopRequireDefault(_cart);
-
-var _products = __webpack_require__(31);
-
-var _products2 = _interopRequireDefault(_products);
-
-var _client = __webpack_require__(30);
-
-var _client2 = _interopRequireDefault(_client);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_vue2.default.use(_vuex2.default);
-
-exports.default = new _vuex2.default.Store({
-  actions: actions,
-  getters: getters,
-  modules: {
-    cart: _cart2.default,
-    products: _products2.default,
-    client: _client2.default
-  }
-});
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(8)();
-exports.push([module.i, "\n.form-signin\r\n{\r\n    max-width: 330px;\r\n    padding: 15px;\r\n    margin: 0 auto;\n}\n.form-signin .form-signin-heading, .form-signin .checkbox\r\n{\r\n    margin-bottom: 10px;\n}\n.form-signin .checkbox\r\n{\r\n    font-weight: normal;\n}\n.form-signin .form-control\r\n{\r\n    position: relative;\r\n    font-size: 16px;\r\n    height: auto;\r\n    padding: 10px;\r\n    box-sizing: border-box;\n}\n.form-signin .form-control:focus\r\n{\r\n    z-index: 2;\n}\n.form-signin input[type=\"text\"]\r\n{\r\n    margin-bottom: -1px;\r\n    border-bottom-left-radius: 0;\r\n    border-bottom-right-radius: 0;\n}\n.form-signin input[type=\"password\"]\r\n{\r\n    margin-bottom: 10px;\r\n    border-top-left-radius: 0;\r\n    border-top-right-radius: 0;\n}\n.account-wall\r\n{\r\n    margin-top: 20px;\r\n    padding: 40px 0px 20px 0px;\r\n    background-color: #f7f7f7;\r\n    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);\n}\n.login-title\r\n{\r\n    color: #555;\r\n    font-size: 18px;\r\n    font-weight: 400;\r\n    display: block;\n}\n.profile-img\r\n{\r\n    width: 96px;\r\n    height: 96px;\r\n    margin: 0 auto 10px;\r\n    display: block;\r\n    border-radius: 50%;\n}\n.need-help\r\n{\r\n    margin-top: 10px;\n}\n.new-account\r\n{\r\ndisplay: block;\n}\r\n", ""]);
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(8)();
-exports.push([module.i, "\n.panel-green {\n    border-color: #5cb85c;\n}\n.panel-green > .panel-heading {\n    border-color: #5cb85c;\n    color: #fff;\n    background-color: #5cb85c;\n}\n.panel-yellow {\n    border-color: #f0ad4e;\n}\n.panel-yellow > .panel-heading {\n    border-color: #f0ad4e;\n    color: #fff;\n    background-color: #f0ad4e;\n}\n.panel-red {\n    border-color: #d9534f;\n}\n.panel-red > .panel-heading {\n    border-color: #d9534f;\n    color: #fff;\n    background-color: #d9534f;\n}\n", ""]);
-
-/***/ }),
-/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -14284,12 +12635,1696 @@ if (window.Sweetalert2) window.sweetAlert = window.swal = window.Sweetalert2;
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(65)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction) {
+  isProduction = _isProduction
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[data-vue-ssr-id~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _vue = __webpack_require__(1);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _App = __webpack_require__(37);
+
+var _App2 = _interopRequireDefault(_App);
+
+var _router = __webpack_require__(7);
+
+var _router2 = _interopRequireDefault(_router);
+
+var _store = __webpack_require__(33);
+
+var _store2 = _interopRequireDefault(_store);
+
+var _currency = __webpack_require__(27);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.filter('currency', _currency.currency);
+
+var app = new _vue2.default({
+    el: '#app',
+    router: _router2.default,
+    store: _store2.default,
+    render: function render(h) {
+        return h(_App2.default);
+    }
+});
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Navbar = __webpack_require__(3);
+
+var _Navbar2 = _interopRequireDefault(_Navbar);
+
+var _vuex = __webpack_require__(4);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+exports.default = {
+  components: { 'Navbar': _Navbar2.default },
+  computed: (0, _vuex.mapGetters)(['evenOrOdd']),
+  methods: (0, _vuex.mapActions)(['increment', 'decrement', 'incrementIfOdd', 'incrementAsync'])
+};
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _auth = __webpack_require__(2);
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    data: function data() {
+        return {
+            listUsers: [],
+            messageFinal: ''
+        };
+    },
+    beforeCreate: function beforeCreate() {
+        _auth2.default.check();
+    }
+}; //
+//
+//
+//
+//
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var _vuex = __webpack_require__(4);
+
+exports.default = {
+  computed: _extends({}, (0, _vuex.mapGetters)({
+    products: 'cartProducts',
+    checkoutStatus: 'checkoutStatus'
+  }), {
+    total: function total() {
+      return this.products.reduce(function (total, p) {
+        return total + p.price * p.quantity;
+      }, 0);
+    }
+  }),
+  methods: {
+    checkout: function checkout(products) {
+      this.$store.dispatch('checkout', products);
+    }
+  }
+};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _sweetalert = __webpack_require__(9);
+
+var _sweetalert2 = _interopRequireDefault(_sweetalert);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    name: 'Cliente',
+    props: ['user'],
+    data: function data() {
+        return {
+            editing: false
+        };
+    },
+
+    methods: {
+        deleteUser: function deleteUser(user) {
+            var data = { id: user };
+            var vm = this;
+
+            (0, _sweetalert2.default)({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: function preConfirm() {
+                    return new Promise(function (resolve, reject) {
+                        vm.$store.dispatch('deleteClient', data).then(function (res) {
+                            resolve();
+                            vm.$store.dispatch('getAllClients');
+                        }, function (response) {
+                            if (response.status == 422) {}
+                        });
+                    });
+                },
+                allowOutsideClick: false
+            }).then(function (email) {
+                (0, _sweetalert2.default)({
+                    type: 'success',
+                    title: 'Exito!',
+                    html: 'Cliente eliminado'
+                });
+            });
+        },
+        editUser: function editUser(user) {
+            var vm = this;
+            var form = '<form class="form-horizontal">' + '<div class="form-group">' + '<label for="inputUser" class="col-sm-4 control-label">Usuario</label>' + '<div class="col-sm-8">' + '<input type="text" value="' + user.name + '" class="form-control" id="inputUser" placeholder="Nombre usuario">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputEmail" class="col-sm-4 control-label">Email</label>' + '<div class="col-sm-8">' + '<input type="email" value="' + user.email + '" class="form-control" id="inputEmail" placeholder="Email">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputPassword" class="col-sm-4 control-label">Password</label>' + '<div class="col-sm-8">' + '<input type="password" value="" class="form-control" id="inputPassword" placeholder="Password">' + '</div>' + '</div>' + '</form>';
+            (0, _sweetalert2.default)({
+                title: 'Editar Cliente',
+                html: form,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+                preConfirm: function preConfirm() {
+                    return new Promise(function (resolve, reject) {
+                        var user = document.getElementById('inputUser').value;
+                        var email = document.getElementById('inputEmail').value;
+                        var pass = document.getElementById('inputPassword').value;
+                        if (email === '' || user === '' || pass == '') {
+                            reject('Datos incompletos');
+                        } else {
+                            var data = {
+                                name: document.getElementById('inputUser').value,
+                                email: document.getElementById('inputEmail').value,
+                                password: document.getElementById('inputPassword').value
+                            };
+
+                            vm.$store.dispatch('addClient', data).then(function (res) {
+                                resolve();
+                            }, function (response) {
+                                if (response.status == 422) {
+                                    reject(response.body.email[0]);
+                                }
+                            });
+                        }
+                    });
+                }
+            }).then(function () {
+                (0, _sweetalert2.default)({
+                    type: 'success',
+                    title: 'Exito!',
+                    html: 'El usuario se agrego correctamente'
+                });
+            });
+        },
+        cancelEdit: function cancelEdit(e) {
+            e.target.value = this.todo.text;
+            this.editing = false;
+        }
+    }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _vuex = __webpack_require__(4);
+
+var _Navbar = __webpack_require__(3);
+
+var _Navbar2 = _interopRequireDefault(_Navbar);
+
+var _Cliente = __webpack_require__(39);
+
+var _Cliente2 = _interopRequireDefault(_Cliente);
+
+var _FormCliente = __webpack_require__(76);
+
+var _FormCliente2 = _interopRequireDefault(_FormCliente);
+
+var _sweetalert = __webpack_require__(9);
+
+var _sweetalert2 = _interopRequireDefault(_sweetalert);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { Navbar: _Navbar2.default, Cliente: _Cliente2.default, FormCliente: _FormCliente2.default },
+  computed: (0, _vuex.mapGetters)({
+    listUsers: 'allClients',
+    addStatus: 'addStatus'
+  }),
+  data: function data() {
+    return {
+      showForm: false
+    };
+  },
+  created: function created() {
+    this.$store.dispatch('getAllClients');
+  },
+
+  methods: {
+    openAddUser: function openAddUser() {
+      var vm = this;
+      vm.showForm = true;
+      var form = '<form class="form-horizontal">' + '<div class="form-group">' + '<label for="inputUser" class="col-sm-4 control-label">Usuario</label>' + '<div class="col-sm-8">' + '<input type="text" class="form-control" id="inputUser" placeholder="Nombre usuario">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputPassword" class="col-sm-4 control-label">Password</label>' + '<div class="col-sm-8">' + '<input type="password" class="form-control" id="inputPassword" placeholder="Password">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputEmail" class="col-sm-4 control-label">Email</label>' + '<div class="col-sm-8">' + '<input type="email" class="form-control" id="inputEmail" placeholder="Email">' + '</div>' + '</div>' + '</form>';
+      (0, _sweetalert2.default)({
+        title: 'Nuevo Cliente',
+        html: form,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        showLoaderOnConfirm: true,
+        allowOutsideClick: false,
+        preConfirm: function preConfirm() {
+          return new Promise(function (resolve, reject) {
+            var user = document.getElementById('inputUser').value;
+            var email = document.getElementById('inputEmail').value;
+            var pass = document.getElementById('inputPassword').value;
+            if (email === '' || user === '' || pass == '') {
+              reject('Datos incompletos');
+            } else {
+              var data = {
+                name: document.getElementById('inputUser').value,
+                email: document.getElementById('inputEmail').value,
+                password: document.getElementById('inputPassword').value
+              };
+
+              vm.$store.dispatch('addClient', data).then(function (res) {
+                resolve();
+              }, function (response) {
+                if (response.status == 422) {
+                  reject(response.body.email[0]);
+                }
+              });
+            }
+          });
+        }
+      }).then(function () {
+        (0, _sweetalert2.default)({
+          type: 'success',
+          title: 'Exito!',
+          html: 'El usuario se agrego correctamente'
+        });
+      }).catch(_sweetalert2.default.noop);
+    }
+  }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Navbar = __webpack_require__(3);
+
+var _Navbar2 = _interopRequireDefault(_Navbar);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { 'Navbar': _Navbar2.default }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+exports.default = {
+    data: function data() {
+        return {
+            message: 'I am an example component!'
+        };
+    }
+};
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Navbar = __webpack_require__(3);
+
+var _Navbar2 = _interopRequireDefault(_Navbar);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { 'Navbar': _Navbar2.default }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _auth = __webpack_require__(2);
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  data: function data() {
+    return {
+      error: '',
+      token: document.getElementById('token').value,
+      user: '',
+      password: ''
+    };
+  },
+
+  methods: {
+    login: function login(event) {
+      event.preventDefault();
+      _auth2.default.signin(this, this.user, this.password);
+      /*var data = JSON.stringify(this.info);
+      this.$http.post('/login', data)
+      .then(function(res){
+            if(res.body.error){
+                this.error = res.body.msg;
+            }else{
+                var token = res.body.token;
+                localStorage.setItem('id_token',token);
+                this.auth = true;
+                this.$router.push('/inicio');
+            }
+          }, function(response){
+          console.log(response.data);
+       })*/
+    }
+  }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _auth = __webpack_require__(2);
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  data: function data() {
+    return {
+      auth: _auth2.default
+    };
+  },
+
+  methods: {
+    logout: function logout() {
+      _auth2.default.signout();
+    }
+  }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ProductList = __webpack_require__(46);
+
+var _ProductList2 = _interopRequireDefault(_ProductList);
+
+var _Cart = __webpack_require__(38);
+
+var _Cart2 = _interopRequireDefault(_Cart);
+
+var _Navbar = __webpack_require__(3);
+
+var _Navbar2 = _interopRequireDefault(_Navbar);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  components: { ProductList: _ProductList2.default, Cart: _Cart2.default, Navbar: _Navbar2.default }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _vuex = __webpack_require__(4);
+
+exports.default = {
+  computed: (0, _vuex.mapGetters)({
+    products: 'allProducts'
+  }),
+  methods: (0, _vuex.mapActions)(['addToCart']),
+  created: function created() {
+    this.$store.dispatch('getAllProducts');
+  }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _auth = __webpack_require__(2);
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    data: function data() {
+        return {
+            name: null,
+            email: null,
+            password: null,
+            success: false,
+            error: false,
+            response: null
+        };
+    },
+
+    methods: {
+        register: function register(event) {
+            event.preventDefault();
+            _auth2.default.register(this, this.name, this.email, this.password);
+        }
+    }
+}; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _vue = __webpack_require__(1);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    getClients: function getClients(clientes) {
+        _vue2.default.http.get('api/users').then(function (response) {
+            clientes(response.data);
+        }, function (response) {
+            clientes([]);
+        });
+    },
+    addClient: function addClient(data, cb, errorCb) {
+        _vue2.default.http.post('api/register', data).then(function (res) {
+            cb(res.body.user);
+        }, function (response) {
+            if (response.status == 422) {
+                errorCb();
+            }
+        });
+    },
+    deleteClient: function deleteClient(data, cb) {
+        _vue2.default.http.post('api/deleteUser', data).then(function (res) {
+            cb(res.body);
+        }, function (response) {
+            if (response.status == 422) {}
+        });
+    }
+};
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.currency = currency;
+var digitsRE = /(\d{3})(?=\d)/g;
+
+function currency(value, currency, decimals) {
+  value = parseFloat(value);
+  if (!isFinite(value) || !value && value !== 0) return '';
+  currency = currency != null ? currency : '$';
+  decimals = decimals != null ? decimals : 2;
+  var stringified = Math.abs(value).toFixed(decimals);
+  var _int = decimals ? stringified.slice(0, -1 - decimals) : stringified;
+  var i = _int.length % 3;
+  var head = i > 0 ? _int.slice(0, i) + (_int.length > 3 ? ',' : '') : '';
+  var _float = decimals ? stringified.slice(-1 - decimals) : '';
+  var sign = value < 0 ? '-' : '';
+  return sign + currency + head + _int.slice(i).replace(digitsRE, '$1,') + _float;
+}
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.addToCart = undefined;
+
+var _mutationTypes = __webpack_require__(5);
+
+var types = _interopRequireWildcard(_mutationTypes);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var addToCart = exports.addToCart = function addToCart(_ref, product) {
+  var commit = _ref.commit;
+
+  commit(types.ADD_TO_CART, {
+    id: product.id
+  });
+}; // actions are functions that cause side effects and can involve
+// asynchronous operations.
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var cartProducts = exports.cartProducts = function cartProducts(state) {
+  return state.cart.added.map(function (_ref) {
+    var id = _ref.id,
+        quantity = _ref.quantity;
+
+    var product = state.products.all.find(function (p) {
+      return p.id === id;
+    });
+    return {
+      title: product.name,
+      price: product.price,
+      quantity: quantity
+    };
+  });
+};
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mutations;
+
+var _shop = __webpack_require__(6);
+
+var _shop2 = _interopRequireDefault(_shop);
+
+var _mutationTypes = __webpack_require__(5);
+
+var types = _interopRequireWildcard(_mutationTypes);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+// initial state
+// shape: [{ id, quantity }]
+var state = {
+  added: [],
+  checkoutStatus: null
+};
+
+// getters
+var getters = {
+  checkoutStatus: function checkoutStatus(state) {
+    return state.checkoutStatus;
+  }
+};
+
+// actions
+var actions = {
+  checkout: function checkout(_ref, products) {
+    var commit = _ref.commit,
+        state = _ref.state;
+
+    var savedCartItems = [].concat(_toConsumableArray(state.added));
+    commit(types.CHECKOUT_REQUEST);
+    _shop2.default.buyProducts(products, function () {
+      return commit(types.CHECKOUT_SUCCESS);
+    }, function () {
+      return commit(types.CHECKOUT_FAILURE, { savedCartItems: savedCartItems });
+    });
+  }
+};
+
+// mutations
+var mutations = (_mutations = {}, _defineProperty(_mutations, types.ADD_TO_CART, function (state, _ref2) {
+  var id = _ref2.id;
+
+  state.lastCheckout = null;
+  var record = state.added.find(function (p) {
+    return p.id === id;
+  });
+  if (!record) {
+    state.added.push({
+      id: id,
+      quantity: 1
+    });
+  } else {
+    record.quantity++;
+  }
+}), _defineProperty(_mutations, types.CHECKOUT_REQUEST, function (state) {
+  // clear cart
+  state.added = [];
+  state.checkoutStatus = null;
+}), _defineProperty(_mutations, types.CHECKOUT_SUCCESS, function (state) {
+  state.checkoutStatus = 'successful';
+}), _defineProperty(_mutations, types.CHECKOUT_FAILURE, function (state, _ref3) {
+  var savedCartItems = _ref3.savedCartItems;
+
+  // rollback to the cart saved before sending the request
+  state.added = savedCartItems;
+  state.checkoutStatus = 'failed';
+}), _mutations);
+
+exports.default = {
+  state: state,
+  getters: getters,
+  actions: actions,
+  mutations: mutations
+};
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mutations;
+
+var _clients = __webpack_require__(26);
+
+var _clients2 = _interopRequireDefault(_clients);
+
+var _mutationTypes = __webpack_require__(5);
+
+var types = _interopRequireWildcard(_mutationTypes);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// initial state
+var state = {
+  all: [],
+  addStatus: null
+};
+
+// getters
+var getters = {
+  allClients: function allClients(state) {
+    return state.all;
+  },
+  addStatus: function addStatus(state) {
+    return state.addStatus;
+  }
+};
+
+// actions
+var actions = {
+  getAllClients: function getAllClients(_ref) {
+    var commit = _ref.commit;
+
+    _clients2.default.getClients(function (clients) {
+      commit(types.RECEIVE_CLIENTS, { clients: clients });
+    });
+  },
+  addClient: function addClient(_ref2, data) {
+    var commit = _ref2.commit,
+        state = _ref2.state;
+
+    _clients2.default.addClient(data, function (client) {
+      commit(types.ADD_SUCCESS, { client: client });
+    }, function () {
+      return commit(types.ADD_FAILURE);
+    });
+  },
+  deleteClient: function deleteClient(_ref3, data) {
+    var commit = _ref3.commit;
+
+    _clients2.default.deleteClient(data);
+  }
+};
+
+// mutations
+var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIENTS, function (state, _ref4) {
+  var clients = _ref4.clients;
+
+  state.all = clients;
+}), _defineProperty(_mutations, types.ADD_SUCCESS, function (state, _ref5) {
+  var client = _ref5.client;
+
+  state.all.push(client);
+  state.addStatus = 'successful';
+}), _defineProperty(_mutations, types.DELETE_SUCCESS, function (state, _ref6) {
+  var client = _ref6.client;
+
+  //state.all.push(client)
+  state.addStatus = 'successful';
+}), _defineProperty(_mutations, types.ADD_FAILURE, function (state, _ref7) {
+  var savedCartItems = _ref7.savedCartItems;
+
+  // rollback to the cart saved before sending the request
+  state.addStatus = 'failed';
+}), _mutations);
+
+exports.default = {
+  state: state,
+  getters: getters,
+  actions: actions,
+  mutations: mutations
+};
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mutations;
+
+var _shop = __webpack_require__(6);
+
+var _shop2 = _interopRequireDefault(_shop);
+
+var _mutationTypes = __webpack_require__(5);
+
+var types = _interopRequireWildcard(_mutationTypes);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// initial state
+var state = {
+  all: []
+};
+
+// getters
+var getters = {
+  allProducts: function allProducts(state) {
+    return state.all;
+  }
+};
+
+// actions
+var actions = {
+  getAllProducts: function getAllProducts(_ref) {
+    var commit = _ref.commit;
+
+    _shop2.default.getProducts(function (products) {
+      commit(types.RECEIVE_PRODUCTS, { products: products });
+    });
+  }
+};
+
+// mutations
+var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_PRODUCTS, function (state, _ref2) {
+  var products = _ref2.products;
+
+  state.all = products;
+}), _defineProperty(_mutations, types.ADD_TO_CART, function (state, _ref3) {
+  var id = _ref3.id;
+
+  state.all.find(function (p) {
+    return p.id === id;
+  }).inventory--;
+}), _mutations);
+
+exports.default = {
+  state: state,
+  getters: getters,
+  actions: actions,
+  mutations: mutations
+};
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _vue = __webpack_require__(1);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _vuex = __webpack_require__(4);
+
+var _vuex2 = _interopRequireDefault(_vuex);
+
+var _actions = __webpack_require__(28);
+
+var actions = _interopRequireWildcard(_actions);
+
+var _getters = __webpack_require__(29);
+
+var getters = _interopRequireWildcard(_getters);
+
+var _cart = __webpack_require__(30);
+
+var _cart2 = _interopRequireDefault(_cart);
+
+var _products = __webpack_require__(32);
+
+var _products2 = _interopRequireDefault(_products);
+
+var _client = __webpack_require__(31);
+
+var _client2 = _interopRequireDefault(_client);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.use(_vuex2.default);
+
+exports.default = new _vuex2.default.Store({
+  actions: actions,
+  getters: getters,
+  modules: {
+    cart: _cart2.default,
+    products: _products2.default,
+    client: _client2.default
+  }
+});
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(8)();
+exports.push([module.i, "\n.form-signin\r\n{\r\n    max-width: 330px;\r\n    padding: 15px;\r\n    margin: 0 auto;\n}\n.form-signin .form-signin-heading, .form-signin .checkbox\r\n{\r\n    margin-bottom: 10px;\n}\n.form-signin .checkbox\r\n{\r\n    font-weight: normal;\n}\n.form-signin .form-control\r\n{\r\n    position: relative;\r\n    font-size: 16px;\r\n    height: auto;\r\n    padding: 10px;\r\n    box-sizing: border-box;\n}\n.form-signin .form-control:focus\r\n{\r\n    z-index: 2;\n}\n.form-signin input[type=\"text\"]\r\n{\r\n    margin-bottom: -1px;\r\n    border-bottom-left-radius: 0;\r\n    border-bottom-right-radius: 0;\n}\n.form-signin input[type=\"password\"]\r\n{\r\n    margin-bottom: 10px;\r\n    border-top-left-radius: 0;\r\n    border-top-right-radius: 0;\n}\n.account-wall\r\n{\r\n    margin-top: 20px;\r\n    padding: 40px 0px 20px 0px;\r\n    background-color: #f7f7f7;\r\n    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);\n}\n.login-title\r\n{\r\n    color: #555;\r\n    font-size: 18px;\r\n    font-weight: 400;\r\n    display: block;\n}\n.profile-img\r\n{\r\n    width: 96px;\r\n    height: 96px;\r\n    margin: 0 auto 10px;\r\n    display: block;\r\n    border-radius: 50%;\n}\n.need-help\r\n{\r\n    margin-top: 10px;\n}\n.new-account\r\n{\r\ndisplay: block;\n}\r\n", ""]);
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(8)();
+exports.push([module.i, "\n.panel-green {\n    border-color: #5cb85c;\n}\n.panel-green > .panel-heading {\n    border-color: #5cb85c;\n    color: #fff;\n    background-color: #5cb85c;\n}\n.panel-yellow {\n    border-color: #f0ad4e;\n}\n.panel-yellow > .panel-heading {\n    border-color: #f0ad4e;\n    color: #fff;\n    background-color: #f0ad4e;\n}\n.panel-red {\n    border-color: #d9534f;\n}\n.panel-red > .panel-heading {\n    border-color: #d9534f;\n    color: #fff;\n    background-color: #d9534f;\n}\n", ""]);
+
+/***/ }),
 /* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(12),
+  __webpack_require__(13),
   /* template */
   __webpack_require__(51),
   /* scopeId */
@@ -14323,7 +14358,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(13),
+  __webpack_require__(14),
   /* template */
   __webpack_require__(52),
   /* scopeId */
@@ -14357,7 +14392,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(14),
+  __webpack_require__(15),
   /* template */
   __webpack_require__(58),
   /* scopeId */
@@ -14391,7 +14426,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(15),
+  __webpack_require__(16),
   /* template */
   __webpack_require__(53),
   /* scopeId */
@@ -14425,7 +14460,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(16),
+  __webpack_require__(17),
   /* template */
   __webpack_require__(48),
   /* scopeId */
@@ -14459,7 +14494,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(17),
+  __webpack_require__(18),
   /* template */
   __webpack_require__(54),
   /* scopeId */
@@ -14493,7 +14528,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(18),
+  __webpack_require__(19),
   /* template */
   __webpack_require__(50),
   /* scopeId */
@@ -14531,7 +14566,7 @@ __webpack_require__(64)
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(19),
+  __webpack_require__(20),
   /* template */
   __webpack_require__(59),
   /* scopeId */
@@ -14569,7 +14604,7 @@ __webpack_require__(63)
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(20),
+  __webpack_require__(21),
   /* template */
   __webpack_require__(49),
   /* scopeId */
@@ -14603,7 +14638,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(22),
+  __webpack_require__(23),
   /* template */
   __webpack_require__(55),
   /* scopeId */
@@ -14637,7 +14672,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(23),
+  __webpack_require__(24),
   /* template */
   __webpack_require__(56),
   /* scopeId */
@@ -14671,7 +14706,7 @@ module.exports = Component.exports
 
 var Component = __webpack_require__(0)(
   /* script */
-  __webpack_require__(24),
+  __webpack_require__(25),
   /* template */
   __webpack_require__(57),
   /* scopeId */
@@ -14713,7 +14748,14 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         _vm.openAddUser()
       }
     }
-  }, [_vm._v("Add User!")]), _vm._v(" "), _c('p', {
+  }, [_vm._v("Add User!")]), _vm._v(" "), _c('FormCliente', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.showForm),
+      expression: "showForm"
+    }]
+  }), _vm._v(" "), _c('p', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -14735,7 +14777,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
         "user": item
       }
     })
-  })], 2)])])])], 1)
+  })], 2)])])], 1)], 1)
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('h1', [_vm._v("Clientes "), _c('small', [_vm._v("Subtext for header")])])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -14967,7 +15009,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "scope": "row"
     }
-  }, [_vm._v(_vm._s(_vm.user.id))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.username))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.email))]), _vm._v(" "), _c('td', [_c('span', {
+  }, [_vm._v(_vm._s(_vm.user.id))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.name))]), _vm._v(" "), _c('td', [_vm._v(_vm._s(_vm.user.email))]), _vm._v(" "), _c('td', [_c('span', {
     staticClass: "label label-default"
   }, [_vm._v(_vm._s(_vm.$store.state.count))])]), _vm._v(" "), _c('td', [_c('button', {
     staticClass: "btn btn-danger btn-xs",
@@ -14985,7 +15027,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "btn btn-success btn-xs",
     on: {
       "click": function($event) {
-        _vm.editUser(_vm.user.id)
+        _vm.editUser(_vm.user)
       }
     }
   }, [_c('span', {
@@ -19618,11 +19660,11 @@ if (inBrowser && window.Vue) {
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(33);
+var content = __webpack_require__(34);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(9)("aae79718", content, false);
+var update = __webpack_require__(10)("aae79718", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -19644,11 +19686,11 @@ if(false) {
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(34);
+var content = __webpack_require__(35);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(9)("1a825734", content, false);
+var update = __webpack_require__(10)("1a825734", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -19733,9 +19775,158 @@ module.exports = g;
 /* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(10);
-module.exports = __webpack_require__(11);
+__webpack_require__(11);
+module.exports = __webpack_require__(12);
 
+
+/***/ }),
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(0)(
+  /* script */
+  __webpack_require__(78),
+  /* template */
+  __webpack_require__(77),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\FormCliente.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] FormCliente.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-027a2e14", Component.options)
+  } else {
+    hotAPI.reload("data-v-027a2e14", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _vm._m(0)
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('form', {
+    staticClass: "form-horizontal"
+  }, [_c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    staticClass: "col-sm-4 control-label",
+    attrs: {
+      "for": "inputUser"
+    }
+  }, [_vm._v("Usuario")]), _vm._v(" "), _c('div', {
+    staticClass: "col-sm-8"
+  }, [_c('input', {
+    staticClass: "form-control",
+    attrs: {
+      "type": "text",
+      "value": "",
+      "id": "inputUser",
+      "placeholder": "Nombre usuario"
+    }
+  })])]), _vm._v(" "), _c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    staticClass: "col-sm-4 control-label",
+    attrs: {
+      "for": "inputEmail"
+    }
+  }, [_vm._v("Email")]), _vm._v(" "), _c('div', {
+    staticClass: "col-sm-8"
+  }, [_c('input', {
+    staticClass: "form-control",
+    attrs: {
+      "type": "email",
+      "value": "",
+      "id": "inputEmail",
+      "placeholder": "Email"
+    }
+  })])]), _vm._v(" "), _c('div', {
+    staticClass: "form-group"
+  }, [_c('label', {
+    staticClass: "col-sm-4 control-label",
+    attrs: {
+      "for": "inputPassword",
+      "value": ""
+    }
+  }, [_vm._v("Password")]), _vm._v(" "), _c('div', {
+    staticClass: "col-sm-8"
+  }, [_c('input', {
+    staticClass: "form-control",
+    attrs: {
+      "type": "password",
+      "value": "",
+      "id": "inputPassword",
+      "placeholder": "Password"
+    }
+  })])])])
+}]}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-027a2e14", module.exports)
+  }
+}
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+   value: true
+});
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+exports.default = {
+   name: 'FormCliente'
+};
 
 /***/ })
 /******/ ]);

@@ -4,6 +4,7 @@
   <div class="page-header">
     <h1>Clientes <small>Subtext for header</small></h1>
     <button class="btn btn-primary" v-on:click="openAddUser()">Add User!</button>
+    <FormCliente v-show="showForm"></FormCliente>
     <p v-show="addStatus">Checkout {{ addStatus }}.</p>
     <div class="row">
       <div class="col-md-3">
@@ -22,27 +23,34 @@
           </table>
         </div>
     </div>
-  </div>
+  </div>  
   </div>
 </template>
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import Navbar from './Navbar.vue'
   import Cliente from './Cliente.vue'
+  import FormCliente from './FormCliente.vue'
   import swal from 'sweetalert2'
 
   export default {
-    components: {Navbar, Cliente},
+    components: {Navbar, Cliente, FormCliente},
       computed: mapGetters({
         listUsers: 'allClients',
         addStatus: 'addStatus'
       }),
+      data() {
+          return {
+              showForm: false
+          }
+      },
       created () {
         this.$store.dispatch('getAllClients')
       },
     methods: {
       openAddUser(){
         let vm = this;
+        vm.showForm = true;
         var form = '<form class="form-horizontal">'
                     +'<div class="form-group">'
                       +'<label for="inputUser" class="col-sm-4 control-label">Usuario</label>'
@@ -101,7 +109,7 @@
                     title: 'Exito!',
                     html: 'El usuario se agrego correctamente'
                   })                         
-          })
+          }).catch(swal.noop);
       }      
     }
   }
