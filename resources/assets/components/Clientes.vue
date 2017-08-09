@@ -4,7 +4,30 @@
   <div class="page-header">
     <h1>Clientes <small>Subtext for header</small></h1>
     <button class="btn btn-primary" v-on:click="openAddUser()">Add User!</button>
-    <FormCliente v-show="showForm"></FormCliente>
+    <button type="button" class="btn btn-primary" v-on:click="openAddUser()" data-target="#myModal">
+  Add User modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <FormCliente v-show="showForm"></FormCliente>
+        <p id="mensajes"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" @click="addUser()" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
     <p v-show="addStatus">Checkout {{ addStatus }}.</p>
     <div class="row">
       <div class="col-md-3">
@@ -41,7 +64,7 @@
       }),
       data() {
           return {
-              showForm: false
+              showForm: true
           }
       },
       created () {
@@ -51,65 +74,36 @@
       openAddUser(){
         let vm = this;
         vm.showForm = true;
-        var form = '<form class="form-horizontal">'
-                    +'<div class="form-group">'
-                      +'<label for="inputUser" class="col-sm-4 control-label">Usuario</label>'
-                      +'<div class="col-sm-8">'
-                        +'<input type="text" class="form-control" id="inputUser" placeholder="Nombre usuario">'
-                      +'</div>'
-                    +'</div>'
-                    +'<div class="form-group">'
-                      +'<label for="inputPassword" class="col-sm-4 control-label">Password</label>'
-                      +'<div class="col-sm-8">'
-                        +'<input type="password" class="form-control" id="inputPassword" placeholder="Password">'
-                      +'</div>'
-                    +'</div>'
-                    +'<div class="form-group">'
-                      +'<label for="inputEmail" class="col-sm-4 control-label">Email</label>'
-                      +'<div class="col-sm-8">'
-                        +'<input type="email" class="form-control" id="inputEmail" placeholder="Email">'
-                      +'</div>'
-                    +'</div>'
-                  +'</form>';
-        swal({
-            title: 'Nuevo Cliente',
-            html: form,
-            showCancelButton: true,
-            confirmButtonText: 'Guardar',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false,
-            preConfirm: function () {
-              return new Promise(function (resolve, reject) {
-                  var user = document.getElementById('inputUser').value;
-                  var email = document.getElementById('inputEmail').value;
-                  var pass = document.getElementById('inputPassword').value;
-                  if (email === '' || user==='' || pass == '') {
-                    reject('Datos incompletos')
-                  } else {
-                    var data = {
-                        name: document.getElementById('inputUser').value,
-                        email: document.getElementById('inputEmail').value,
-                        password: document.getElementById('inputPassword').value
-                        };
+        $('#myModal').modal('show');
+      },
+      addUser(){
+          let vm = this;
+          var user = document.getElementById('inputUser').value;
+          var email = document.getElementById('inputEmail').value;
+          var pass = document.getElementById('inputPassword').value;
+          if (email === '' || user==='' || pass == '') {
+            document.getElementById('mensajes').innerHTML = 'Datos incompletos';
+          } else {
+            var data = {
+                name: user,
+                email: email,
+                password: pass
+                };
 
-                        vm.$store.dispatch('addClient', data)
-                            .then(function(res){
-                                resolve();           
-                              }, function(response){
-                                if (response.status ==422){
-                                    reject(response.body.email[0]);
-                                }
-                          })
-                  }
-              })
-            }         
-          }).then(function() {
-              swal({
-                    type: 'success',
-                    title: 'Exito!',
-                    html: 'El usuario se agrego correctamente'
-                  })                         
-          }).catch(swal.noop);
+                this.$store.dispatch('addClient', data)
+                    .then(function(res){
+                        vm.showForm = false;
+                        document.getElementById('mensajes').innerHTML = 'Usuario agregado con exito';
+                        //if (res.status == 422){
+                          //  document.getElementById('mensajes').innerHTML = response.body.email[0];
+                        //}else{
+                            //var mymodal = $('#myModal');
+                            //mymodal.find('.modal-body').text('Usuario agregado con exito');
+                        //}                                   
+                      }, function(response){
+                        alert('error');
+                  })
+          }
       }      
     }
   }

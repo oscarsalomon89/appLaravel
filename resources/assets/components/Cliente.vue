@@ -10,7 +10,7 @@
         <button @click="deleteUser(user.id)" class="btn btn-danger btn-xs">
             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
         </button>
-        <button @click="editUser(user)" class="btn btn-success btn-xs">
+        <button @click="editarUsuario(user)" class="btn btn-success btn-xs">
             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
         </button>
         </td>
@@ -62,6 +62,12 @@ import swal from 'sweetalert2'
                 })
 
             
+        },
+        editarUsuario(user){
+            document.getElementById('inputUser').value = user.name;
+            document.getElementById('inputEmail').value = user.email;
+            document.getElementById('inputPassword').value = '';
+            $('#myModal').modal('show');
         },
         editUser (user) {
             let vm = this;
