@@ -24,7 +24,8 @@ import swal from 'sweetalert2'
     props: ['user'],
     data() {
         return {
-            editing: false
+            titulo: 'Editar Usuario',
+            showForm: true
         }
     },
     methods: {
@@ -64,9 +65,13 @@ import swal from 'sweetalert2'
             
         },
         editarUsuario(user){
+            this.showForm = true;
+            this.titulo = 'Editar Usuario';
+            document.getElementById('iduser').value = user.id;
             document.getElementById('inputUser').value = user.name;
             document.getElementById('inputEmail').value = user.email;
             document.getElementById('inputPassword').value = '';
+            document.getElementById('mensajes').innerHTML = '';
             $('#myModal').modal('show');
         },
         editUser (user) {

@@ -1,5 +1,6 @@
 <template>
     <form class="form-horizontal">
+        <input type="hidden" value="" id="iduser" name="iduser">
         <div class="form-group">
         <label for="inputUser" class="col-sm-4 control-label">Usuario</label>
         <div class="col-sm-8">

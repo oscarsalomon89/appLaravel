@@ -13047,7 +13047,8 @@ exports.default = {
     props: ['user'],
     data: function data() {
         return {
-            editing: false
+            titulo: 'Editar Usuario',
+            showForm: true
         };
     },
 
@@ -13083,9 +13084,13 @@ exports.default = {
             });
         },
         editarUsuario: function editarUsuario(user) {
+            this.showForm = true;
+            this.titulo = 'Editar Usuario';
+            document.getElementById('iduser').value = user.id;
             document.getElementById('inputUser').value = user.name;
             document.getElementById('inputEmail').value = user.email;
             document.getElementById('inputPassword').value = '';
+            document.getElementById('mensajes').innerHTML = '';
             $('#myModal').modal('show');
         },
         editUser: function editUser(user) {
@@ -13193,7 +13198,8 @@ exports.default = {
   }),
   data: function data() {
     return {
-      showForm: true
+      showForm: true,
+      titulo: 'Nuevo Usuario'
     };
   },
   created: function created() {
@@ -13202,8 +13208,12 @@ exports.default = {
 
   methods: {
     openAddUser: function openAddUser() {
-      var vm = this;
-      vm.showForm = true;
+      this.showForm = true;
+      document.getElementById('iduser').value = 0;
+      document.getElementById('inputUser').value = '';
+      document.getElementById('inputEmail').value = '';
+      document.getElementById('inputPassword').value = '';
+      document.getElementById('mensajes').innerHTML = '';
       $('#myModal').modal('show');
     },
     addUser: function addUser() {
@@ -13221,7 +13231,7 @@ exports.default = {
         };
 
         this.$store.dispatch('addClient', data).then(function (res) {
-          vm.showForm = false;
+          vm.showForm = false; //oculta el form
           document.getElementById('mensajes').innerHTML = 'Usuario agregado con exito';
           //if (res.status == 422){
           //  document.getElementById('mensajes').innerHTML = response.body.email[0];
@@ -13381,6 +13391,7 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
    value: true
 });
+//
 //
 //
 //
@@ -14833,7 +14844,14 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('form', {
     staticClass: "form-horizontal"
-  }, [_c('div', {
+  }, [_c('input', {
+    attrs: {
+      "type": "hidden",
+      "value": "",
+      "id": "iduser",
+      "name": "iduser"
+    }
+  }), _vm._v(" "), _c('div', {
     staticClass: "form-group"
   }, [_c('label', {
     staticClass: "col-sm-4 control-label",
@@ -14935,7 +14953,14 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('div', {
     staticClass: "modal-content"
-  }, [_vm._m(1), _vm._v(" "), _c('div', {
+  }, [_c('div', {
+    staticClass: "modal-header"
+  }, [_vm._m(1), _vm._v(" "), _c('h4', {
+    staticClass: "modal-title",
+    attrs: {
+      "id": "myModalLabel"
+    }
+  }, [_vm._v(_vm._s(_vm.titulo))])]), _vm._v(" "), _c('div', {
     staticClass: "modal-body"
   }, [_c('FormCliente', {
     directives: [{
@@ -14945,6 +14970,12 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       expression: "showForm"
     }]
   }), _vm._v(" "), _c('p', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (!_vm.showForm),
+      expression: "!showForm"
+    }],
     attrs: {
       "id": "mensajes"
     }
@@ -14957,6 +14988,12 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "data-dismiss": "modal"
     }
   }, [_vm._v("Close")]), _vm._v(" "), _c('button', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.showForm),
+      expression: "showForm"
+    }],
     staticClass: "btn btn-primary",
     attrs: {
       "type": "button"
@@ -14992,9 +15029,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
 },staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('h1', [_vm._v("Clientes "), _c('small', [_vm._v("Subtext for header")])])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    staticClass: "modal-header"
-  }, [_c('button', {
+  return _c('button', {
     staticClass: "close",
     attrs: {
       "type": "button",
@@ -15005,12 +15040,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "aria-hidden": "true"
     }
-  }, [_vm._v("×")])]), _vm._v(" "), _c('h4', {
-    staticClass: "modal-title",
-    attrs: {
-      "id": "myModalLabel"
-    }
-  }, [_vm._v("Modal title")])])
+  }, [_vm._v("×")])])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('tr', [_c('th', [_vm._v("#")]), _vm._v(" "), _c('th', [_vm._v("User")]), _vm._v(" "), _c('th', [_vm._v("Email")]), _vm._v(" "), _c('th', [_vm._v("Auth")]), _vm._v(" "), _c('th')])
 }]}

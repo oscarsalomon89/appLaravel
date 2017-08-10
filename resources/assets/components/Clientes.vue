@@ -14,15 +14,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        <h4 class="modal-title" id="myModalLabel">{{titulo}}</h4>
       </div>
       <div class="modal-body">
         <FormCliente v-show="showForm"></FormCliente>
-        <p id="mensajes"></p>
+        <p v-show="!showForm" id="mensajes"></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" @click="addUser()" class="btn btn-primary">Save changes</button>
+        <button type="button" v-show="showForm" @click="addUser()" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
@@ -64,7 +64,8 @@
       }),
       data() {
           return {
-              showForm: true
+              showForm: true,
+              titulo: 'Nuevo Usuario'
           }
       },
       created () {
@@ -72,8 +73,12 @@
       },
     methods: {
       openAddUser(){
-        let vm = this;
-        vm.showForm = true;
+        this.showForm = true;
+        document.getElementById('iduser').value = 0;
+        document.getElementById('inputUser').value = '';
+        document.getElementById('inputEmail').value = '';
+        document.getElementById('inputPassword').value = '';
+        document.getElementById('mensajes').innerHTML = '';
         $('#myModal').modal('show');
       },
       addUser(){
@@ -92,7 +97,7 @@
 
                 this.$store.dispatch('addClient', data)
                     .then(function(res){
-                        vm.showForm = false;
+                        vm.showForm = false;//oculta el form
                         document.getElementById('mensajes').innerHTML = 'Usuario agregado con exito';
                         //if (res.status == 422){
                           //  document.getElementById('mensajes').innerHTML = response.body.email[0];
