@@ -13218,9 +13218,11 @@ exports.default = {
     },
     addUser: function addUser() {
       var vm = this;
+      var id = document.getElementById('iduser').value;
       var user = document.getElementById('inputUser').value;
       var email = document.getElementById('inputEmail').value;
       var pass = document.getElementById('inputPassword').value;
+
       if (email === '' || user === '' || pass == '') {
         document.getElementById('mensajes').innerHTML = 'Datos incompletos';
       } else {
@@ -13229,6 +13231,11 @@ exports.default = {
           email: email,
           password: pass
         };
+
+        if (id > 0) {
+          this.updateUser(data, id);
+          return;
+        }
 
         this.$store.dispatch('addClient', data).then(function (res) {
           vm.showForm = false; //oculta el form
@@ -13243,6 +13250,15 @@ exports.default = {
           alert('error');
         });
       }
+    },
+    updateUser: function updateUser(user, id) {
+      user.id = id;
+      this.$store.dispatch('updateClient', user).then(function (res) {
+        vm.showForm = false; //oculta el form
+        document.getElementById('mensajes').innerHTML = 'Usuario editado con exito';
+      }, function (response) {
+        alert('error');
+      });
     }
   }
 }; //
@@ -13963,6 +13979,15 @@ exports.default = {
             }
         });
     },
+    updateClient: function updateClient(data, cb, errorCb) {
+        _vue2.default.http.post('api/updateUser', data).then(function (res) {
+            cb(res.body.user);
+        }, function (response) {
+            if (response.status == 422) {
+                errorCb();
+            }
+        });
+    },
     deleteClient: function deleteClient(data, cb) {
         _vue2.default.http.post('api/deleteUser', data).then(function (res) {
             cb(res.body);
@@ -14210,30 +14235,40 @@ var actions = {
       return commit(types.ADD_FAILURE);
     });
   },
-  deleteClient: function deleteClient(_ref3, data) {
-    var commit = _ref3.commit;
+  updateClient: function updateClient(_ref3, data) {
+    var commit = _ref3.commit,
+        state = _ref3.state;
+
+    _clients2.default.updateClient(data, function (client) {
+      commit(types.ADD_SUCCESS, { client: client });
+    }, function () {
+      return commit(types.ADD_FAILURE);
+    });
+  },
+  deleteClient: function deleteClient(_ref4, data) {
+    var commit = _ref4.commit;
 
     _clients2.default.deleteClient(data);
   }
 };
 
 // mutations
-var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIENTS, function (state, _ref4) {
-  var clients = _ref4.clients;
+var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIENTS, function (state, _ref5) {
+  var clients = _ref5.clients;
 
   state.all = clients;
-}), _defineProperty(_mutations, types.ADD_SUCCESS, function (state, _ref5) {
-  var client = _ref5.client;
+}), _defineProperty(_mutations, types.ADD_SUCCESS, function (state, _ref6) {
+  var client = _ref6.client;
 
   state.all.push(client);
   state.addStatus = 'successful';
-}), _defineProperty(_mutations, types.DELETE_SUCCESS, function (state, _ref6) {
-  var client = _ref6.client;
+}), _defineProperty(_mutations, types.DELETE_SUCCESS, function (state, _ref7) {
+  var client = _ref7.client;
 
   //state.all.push(client)
   state.addStatus = 'successful';
-}), _defineProperty(_mutations, types.ADD_FAILURE, function (state, _ref7) {
-  var savedCartItems = _ref7.savedCartItems;
+}), _defineProperty(_mutations, types.ADD_FAILURE, function (state, _ref8) {
+  var savedCartItems = _ref8.savedCartItems;
 
   // rollback to the cart saved before sending the request
   state.addStatus = 'failed';

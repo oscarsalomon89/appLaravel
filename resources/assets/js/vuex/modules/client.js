@@ -29,6 +29,14 @@ const actions = {
     )
   },
 
+  updateClient ({ commit, state }, data) {
+    clients.updateClient(
+      data,
+      client => { commit(types.ADD_SUCCESS, { client })},
+      () => commit(types.ADD_FAILURE)
+    )
+  },
+
   deleteClient ({ commit }, data) {
     clients.deleteClient(data)
   }

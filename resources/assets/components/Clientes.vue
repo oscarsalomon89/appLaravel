@@ -83,9 +83,11 @@
       },
       addUser(){
           let vm = this;
+          var id   = document.getElementById('iduser').value;
           var user = document.getElementById('inputUser').value;
           var email = document.getElementById('inputEmail').value;
-          var pass = document.getElementById('inputPassword').value;
+          var pass = document.getElementById('inputPassword').value;          
+
           if (email === '' || user==='' || pass == '') {
             document.getElementById('mensajes').innerHTML = 'Datos incompletos';
           } else {
@@ -94,6 +96,11 @@
                 email: email,
                 password: pass
                 };
+
+                if(id>0){
+                  this.updateUser(data,id);
+                  return;
+                }
 
                 this.$store.dispatch('addClient', data)
                     .then(function(res){
@@ -109,6 +116,16 @@
                         alert('error');
                   })
           }
+      },
+      updateUser(user,id){
+          user.id = id;
+          this.$store.dispatch('updateClient', user)
+              .then(function(res){
+                  vm.showForm = false;//oculta el form
+                  document.getElementById('mensajes').innerHTML = 'Usuario editado con exito';                                 
+                }, function(response){
+                  alert('error');
+            })
       }      
     }
   }
