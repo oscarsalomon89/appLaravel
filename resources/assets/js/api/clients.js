@@ -24,7 +24,7 @@ export default {
   updateClient (data, cb, errorCb) {
       Vue.http.post('api/updateUser', data)
         .then(function(res){
-            cb(res.body.user)             
+            cb()             
             }, function(response){
             if (response.status ==422){
                 errorCb()

@@ -18,7 +18,7 @@
       </div>
       <div class="modal-body">
         <FormCliente v-show="showForm"></FormCliente>
-        <p v-show="!showForm" id="mensajes"></p>
+        <p v-show="!showForm" id="mensajes">Usuario... {{ addStatus }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -42,7 +42,7 @@
                 <th>Auth</th>
                 <th></th>
             </tr>
-            <cliente v-for="item in listUsers" :user="item" :key="item._id"></cliente>            
+            <cliente v-for="item in listUsers" :user="item" :key="item.id"></cliente>            
           </table>
         </div>
     </div>
@@ -54,7 +54,6 @@
   import Navbar from './Navbar.vue'
   import Cliente from './Cliente.vue'
   import FormCliente from './FormCliente.vue'
-  import swal from 'sweetalert2'
 
   export default {
     components: {Navbar, Cliente, FormCliente},
@@ -81,7 +80,7 @@
         document.getElementById('mensajes').innerHTML = '';
         $('#myModal').modal('show');
       },
-      addUser(){
+      addUser(){          
           let vm = this;
           var id   = document.getElementById('iduser').value;
           var user = document.getElementById('inputUser').value;
@@ -118,11 +117,12 @@
           }
       },
       updateUser(user,id){
+          let vm = this;
           user.id = id;
           this.$store.dispatch('updateClient', user)
               .then(function(res){
-                  vm.showForm = false;//oculta el form
-                  document.getElementById('mensajes').innerHTML = 'Usuario editado con exito';                                 
+                  vm.$store.dispatch('getAllClients')
+                  vm.showForm = false;//oculta el form                              
                 }, function(response){
                   alert('error');
             })

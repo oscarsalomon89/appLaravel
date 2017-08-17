@@ -10786,6 +10786,8 @@ var ADD_CLIENT = exports.ADD_CLIENT = 'ADD_CLIENT';
 var ADD_SUCCESS = exports.ADD_SUCCESS = 'ADD_SUCCESS';
 var ADD_FAILURE = exports.ADD_FAILURE = 'ADD_FAILURE';
 var DELETE_SUCCESS = exports.DELETE_SUCCESS = 'DELETE_SUCCESS';
+var UPDATE_SUCCESS = exports.UPDATE_SUCCESS = 'UPDATE_SUCCESS';
+var UPDATE_FAILURE = exports.UPDATE_FAILURE = 'UPDATE_FAILURE';
 
 /***/ }),
 /* 6 */
@@ -13083,57 +13085,15 @@ exports.default = {
                 });
             });
         },
-        editarUsuario: function editarUsuario(user) {
+        editarUsuario: function editarUsuario(user, key) {
             this.showForm = true;
             this.titulo = 'Editar Usuario';
             document.getElementById('iduser').value = user.id;
             document.getElementById('inputUser').value = user.name;
             document.getElementById('inputEmail').value = user.email;
             document.getElementById('inputPassword').value = '';
-            document.getElementById('mensajes').innerHTML = '';
-            $('#myModal').modal('show');
-        },
-        editUser: function editUser(user) {
-            var vm = this;
-            var form = '<form class="form-horizontal">' + '<div class="form-group">' + '<label for="inputUser" class="col-sm-4 control-label">Usuario</label>' + '<div class="col-sm-8">' + '<input type="text" value="' + user.name + '" class="form-control" id="inputUser" placeholder="Nombre usuario">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputEmail" class="col-sm-4 control-label">Email</label>' + '<div class="col-sm-8">' + '<input type="email" value="' + user.email + '" class="form-control" id="inputEmail" placeholder="Email">' + '</div>' + '</div>' + '<div class="form-group">' + '<label for="inputPassword" class="col-sm-4 control-label">Password</label>' + '<div class="col-sm-8">' + '<input type="password" value="" class="form-control" id="inputPassword" placeholder="Password">' + '</div>' + '</div>' + '</form>';
-            (0, _sweetalert2.default)({
-                title: 'Editar Cliente',
-                html: form,
-                showCancelButton: true,
-                confirmButtonText: 'Guardar',
-                showLoaderOnConfirm: true,
-                allowOutsideClick: false,
-                preConfirm: function preConfirm() {
-                    return new Promise(function (resolve, reject) {
-                        var user = document.getElementById('inputUser').value;
-                        var email = document.getElementById('inputEmail').value;
-                        var pass = document.getElementById('inputPassword').value;
-                        if (email === '' || user === '' || pass == '') {
-                            reject('Datos incompletos');
-                        } else {
-                            var data = {
-                                name: document.getElementById('inputUser').value,
-                                email: document.getElementById('inputEmail').value,
-                                password: document.getElementById('inputPassword').value
-                            };
 
-                            vm.$store.dispatch('addClient', data).then(function (res) {
-                                resolve();
-                            }, function (response) {
-                                if (response.status == 422) {
-                                    reject(response.body.email[0]);
-                                }
-                            });
-                        }
-                    });
-                }
-            }).then(function () {
-                (0, _sweetalert2.default)({
-                    type: 'success',
-                    title: 'Exito!',
-                    html: 'El usuario se agrego correctamente'
-                });
-            });
+            $('#myModal').modal('show');
         },
         cancelEdit: function cancelEdit(e) {
             e.target.value = this.todo.text;
@@ -13184,11 +13144,59 @@ var _FormCliente = __webpack_require__(44);
 
 var _FormCliente2 = _interopRequireDefault(_FormCliente);
 
-var _sweetalert = __webpack_require__(9);
-
-var _sweetalert2 = _interopRequireDefault(_sweetalert);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 exports.default = {
   components: { Navbar: _Navbar2.default, Cliente: _Cliente2.default, FormCliente: _FormCliente2.default },
@@ -13252,66 +13260,17 @@ exports.default = {
       }
     },
     updateUser: function updateUser(user, id) {
+      var vm = this;
       user.id = id;
       this.$store.dispatch('updateClient', user).then(function (res) {
-        vm.showForm = false; //oculta el form
-        document.getElementById('mensajes').innerHTML = 'Usuario editado con exito';
+        vm.$store.dispatch('getAllClients');
+        vm.showForm = false; //oculta el form                              
       }, function (response) {
         alert('error');
       });
     }
   }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+};
 
 /***/ }),
 /* 18 */
@@ -13981,7 +13940,7 @@ exports.default = {
     },
     updateClient: function updateClient(data, cb, errorCb) {
         _vue2.default.http.post('api/updateUser', data).then(function (res) {
-            cb(res.body.user);
+            cb();
         }, function (response) {
             if (response.status == 422) {
                 errorCb();
@@ -14226,8 +14185,7 @@ var actions = {
     });
   },
   addClient: function addClient(_ref2, data) {
-    var commit = _ref2.commit,
-        state = _ref2.state;
+    var commit = _ref2.commit;
 
     _clients2.default.addClient(data, function (client) {
       commit(types.ADD_SUCCESS, { client: client });
@@ -14236,13 +14194,12 @@ var actions = {
     });
   },
   updateClient: function updateClient(_ref3, data) {
-    var commit = _ref3.commit,
-        state = _ref3.state;
+    var commit = _ref3.commit;
 
-    _clients2.default.updateClient(data, function (client) {
-      commit(types.ADD_SUCCESS, { client: client });
+    _clients2.default.updateClient(data, function () {
+      return commit(types.UPDATE_SUCCESS);
     }, function () {
-      return commit(types.ADD_FAILURE);
+      return commit(types.UPDATE_FAILURE);
     });
   },
   deleteClient: function deleteClient(_ref4, data) {
@@ -14262,6 +14219,8 @@ var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIE
 
   state.all.push(client);
   state.addStatus = 'successful';
+}), _defineProperty(_mutations, types.UPDATE_SUCCESS, function (state) {
+  state.addStatus = 'successful';
 }), _defineProperty(_mutations, types.DELETE_SUCCESS, function (state, _ref7) {
   var client = _ref7.client;
 
@@ -14270,6 +14229,9 @@ var mutations = (_mutations = {}, _defineProperty(_mutations, types.RECEIVE_CLIE
 }), _defineProperty(_mutations, types.ADD_FAILURE, function (state, _ref8) {
   var savedCartItems = _ref8.savedCartItems;
 
+  // rollback to the cart saved before sending the request
+  state.addStatus = 'failed';
+}), _defineProperty(_mutations, types.UPDATE_FAILURE, function (state) {
   // rollback to the cart saved before sending the request
   state.addStatus = 'failed';
 }), _mutations);
@@ -15014,7 +14976,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     attrs: {
       "id": "mensajes"
     }
-  })], 1), _vm._v(" "), _c('div', {
+  }, [_vm._v("Usuario... " + _vm._s(_vm.addStatus))])], 1), _vm._v(" "), _c('div', {
     staticClass: "modal-footer"
   }, [_c('button', {
     staticClass: "btn btn-default",
@@ -15055,7 +15017,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "table table-striped"
   }, [_vm._m(2), _vm._v(" "), _vm._l((_vm.listUsers), function(item) {
     return _c('cliente', {
-      key: item._id,
+      key: item.id,
       attrs: {
         "user": item
       }

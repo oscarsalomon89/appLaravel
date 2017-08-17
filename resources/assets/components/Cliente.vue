@@ -64,77 +64,15 @@ import swal from 'sweetalert2'
 
             
         },
-        editarUsuario(user){
+        editarUsuario(user,key){            
             this.showForm = true;
             this.titulo = 'Editar Usuario';
             document.getElementById('iduser').value = user.id;
             document.getElementById('inputUser').value = user.name;
             document.getElementById('inputEmail').value = user.email;
             document.getElementById('inputPassword').value = '';
-            document.getElementById('mensajes').innerHTML = '';
-            $('#myModal').modal('show');
-        },
-        editUser (user) {
-            let vm = this;
-            var form = '<form class="form-horizontal">'
-                        +'<div class="form-group">'
-                        +'<label for="inputUser" class="col-sm-4 control-label">Usuario</label>'
-                        +'<div class="col-sm-8">'
-                            +'<input type="text" value="'+user.name+'" class="form-control" id="inputUser" placeholder="Nombre usuario">'
-                        +'</div>'
-                        +'</div>'
-                        +'<div class="form-group">'
-                        +'<label for="inputEmail" class="col-sm-4 control-label">Email</label>'
-                        +'<div class="col-sm-8">'
-                            +'<input type="email" value="'+user.email+'" class="form-control" id="inputEmail" placeholder="Email">'
-                        +'</div>'
-                        +'</div>'
-                        +'<div class="form-group">'
-                        +'<label for="inputPassword" class="col-sm-4 control-label">Password</label>'
-                        +'<div class="col-sm-8">'
-                            +'<input type="password" value="" class="form-control" id="inputPassword" placeholder="Password">'
-                        +'</div>'
-                        +'</div>'                        
-                    +'</form>';
-            swal({
-                title: 'Editar Cliente',
-                html: form,
-                showCancelButton: true,
-                confirmButtonText: 'Guardar',
-                showLoaderOnConfirm: true,
-                allowOutsideClick: false,
-                preConfirm: function () {
-                return new Promise(function (resolve, reject) {
-                    var user = document.getElementById('inputUser').value;
-                    var email = document.getElementById('inputEmail').value;
-                    var pass = document.getElementById('inputPassword').value;
-                    if (email === '' || user==='' || pass == '') {
-                        reject('Datos incompletos')
-                    } else {
-                        var data = {
-                            name: document.getElementById('inputUser').value,
-                            email: document.getElementById('inputEmail').value,
-                            password: document.getElementById('inputPassword').value
-                            };
 
-                            vm.$store.dispatch('addClient', data)
-                                .then(function(res){
-                                    resolve();           
-                                }, function(response){
-                                    if (response.status ==422){
-                                        reject(response.body.email[0]);
-                                    }
-                            })
-                    }
-                })
-                }         
-            }).then(function() {
-                swal({
-                        type: 'success',
-                        title: 'Exito!',
-                        html: 'El usuario se agrego correctamente'
-                    })                         
-            })
+            $('#myModal').modal('show');
         },
         cancelEdit (e) {
             e.target.value = this.todo.text
