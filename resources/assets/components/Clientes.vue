@@ -3,7 +3,6 @@
     <Navbar></Navbar>
   <div class="page-header">
     <h1>Clientes <small>Subtext for header</small></h1>
-    <button class="btn btn-primary" v-on:click="openAddUser()">Add User!</button>
     <button type="button" class="btn btn-primary" v-on:click="openAddUser()" data-target="#myModal">
   Add User modal
 </button>
@@ -17,8 +16,9 @@
         <h4 class="modal-title" id="myModalLabel">{{titulo}}</h4>
       </div>
       <div class="modal-body">
-        <FormCliente v-show="showForm"></FormCliente>
-        <p v-show="!showForm" id="mensajes">Usuario... {{ addStatus }}</p>
+        <FormCliente v-show="showForm" :user="userSelected"></FormCliente>
+        <p id="mensajesError"></p>
+        <p v-show="!showForm" id="mensajes">{{ addStatus }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -27,8 +27,7 @@
     </div>
   </div>
 </div>
-    
-    <p v-show="addStatus">Checkout {{ addStatus }}.</p>
+
     <div class="row">
       <div class="col-md-3">
 
@@ -59,7 +58,8 @@
     components: {Navbar, Cliente, FormCliente},
       computed: mapGetters({
         listUsers: 'allClients',
-        addStatus: 'addStatus'
+        addStatus: 'addStatus',
+        userSelected: 'userSelected'
       }),
       data() {
           return {
@@ -73,11 +73,13 @@
     methods: {
       openAddUser(){
         this.showForm = true;
-        document.getElementById('iduser').value = 0;
+        this.$store.dispatch('selectClient',[]);
+        document.getElementById('mensajesError').innerHTML = '';
+        /*document.getElementById('iduser').value = 0;
         document.getElementById('inputUser').value = '';
         document.getElementById('inputEmail').value = '';
-        document.getElementById('inputPassword').value = '';
-        document.getElementById('mensajes').innerHTML = '';
+        document.getElementById('inputPassword').value = '';*/
+
         $('#myModal').modal('show');
       },
       addUser(){          
@@ -88,7 +90,7 @@
           var pass = document.getElementById('inputPassword').value;          
 
           if (email === '' || user==='' || pass == '') {
-            document.getElementById('mensajes').innerHTML = 'Datos incompletos';
+            document.getElementById('mensajesError').innerHTML = 'Datos incompletos';
           } else {
             var data = {
                 name: user,
@@ -96,7 +98,7 @@
                 password: pass
                 };
 
-                if(id>0){
+                if(id != ''){
                   this.updateUser(data,id);
                   return;
                 }
@@ -104,7 +106,7 @@
                 this.$store.dispatch('addClient', data)
                     .then(function(res){
                         vm.showForm = false;//oculta el form
-                        document.getElementById('mensajes').innerHTML = 'Usuario agregado con exito';
+                        document.getElementById('mensajesError').innerHTML = '';
                         //if (res.status == 422){
                           //  document.getElementById('mensajes').innerHTML = response.body.email[0];
                         //}else{

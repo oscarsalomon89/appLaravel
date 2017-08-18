@@ -17,11 +17,15 @@
     </tr>
 </template>
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import swal from 'sweetalert2'
 
  export default {
     name: 'Cliente',
     props: ['user'],
+    computed: mapGetters({
+        userSelected: 'userSelected'
+      }),
     data() {
         return {
             titulo: 'Editar Usuario',
@@ -64,13 +68,15 @@ import swal from 'sweetalert2'
 
             
         },
-        editarUsuario(user,key){            
+        editarUsuario(user){            
             this.showForm = true;
             this.titulo = 'Editar Usuario';
-            document.getElementById('iduser').value = user.id;
+            this.$store.dispatch('selectClient',user);
+            document.getElementById('mensajesError').innerHTML = '';
+            /*document.getElementById('iduser').value = user.id;
             document.getElementById('inputUser').value = user.name;
             document.getElementById('inputEmail').value = user.email;
-            document.getElementById('inputPassword').value = '';
+            document.getElementById('inputPassword').value = '';*/
 
             $('#myModal').modal('show');
         },
