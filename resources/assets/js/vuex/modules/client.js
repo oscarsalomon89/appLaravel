@@ -52,6 +52,7 @@ const actions = {
 const mutations = {
   [types.USER_SELECTED] (state, { client }) {
     state.userSelected = client
+    state.addStatus = null
   },
 
   [types.RECEIVE_CLIENTS] (state, { clients }) {

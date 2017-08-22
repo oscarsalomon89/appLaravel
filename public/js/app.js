@@ -9823,136 +9823,6 @@ module.exports = Vue$3;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _vue = __webpack_require__(1);
-
-var _vue2 = _interopRequireDefault(_vue);
-
-var _router = __webpack_require__(7);
-
-var _router2 = _interopRequireDefault(_router);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-    user: {
-        authenticated: false,
-        rol: null,
-        profile: null
-    },
-    check: function check() {
-        var _this = this;
-
-        if (localStorage.getItem('id_token') !== null) {
-            _vue2.default.http.get('api/user').then(function (response) {
-                _this.user.authenticated = true;
-                _this.user.profile = response.data.data;
-                _this.user.rol = response.data.data['rol'];
-            }, function (response) {
-                localStorage.removeItem('id_token');
-                _this.user.authenticated = false;
-                _this.user.profile = null;
-                _this.user.rol = null;
-                _router2.default.push('login');
-            });
-        } else {
-            _router2.default.push('login');
-        }
-    },
-    islogin: function islogin(to, from, next) {
-        if (localStorage.getItem('id_token') !== null) {
-            _vue2.default.http.get('api/user').then(function (response) {
-                _router2.default.push('inicio');
-            }, function (response) {
-                next();
-            });
-        } else {
-            next();
-        }
-    },
-    register: function register(context, name, email, password) {
-        _vue2.default.http.post('api/register', {
-            name: name,
-            email: email,
-            password: password
-        }).then(function (response) {
-            context.success = true;
-        }, function (response) {
-            context.response = response.data;
-            context.error = true;
-        });
-    },
-    signin: function signin(context, user, password) {
-        var _this2 = this;
-
-        _vue2.default.http.post('api/signin', {
-            name: user,
-            password: password
-        }).then(function (response) {
-            context.error = false;
-            localStorage.setItem('id_token', response.data.meta.token);
-            _vue2.default.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
-            _this2.user.authenticated = true;
-            _this2.user.profile = response.data.data;
-            _this2.user.rol = response.data.data['rol'];
-            _router2.default.push('inicio');
-        }, function (response) {
-            context.error = true;
-        });
-    },
-    signout: function signout() {
-        localStorage.removeItem('id_token');
-        this.user.authenticated = false;
-        this.user.profile = null;
-        this.user.rol = null;
-        _router2.default.push('login');
-    }
-};
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Component = __webpack_require__(0)(
-  /* script */
-  __webpack_require__(22),
-  /* template */
-  __webpack_require__(63),
-  /* scopeId */
-  null,
-  /* cssModules */
-  null
-)
-Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\Navbar.vue"
-if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
-if (Component.options.functional) {console.error("[vue-loader] Navbar.vue: functional components are not supported with templates, they should use render functions.")}
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-fb383640", Component.options)
-  } else {
-    hotAPI.reload("data-v-fb383640", Component.options)
-  }
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
-/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10766,6 +10636,136 @@ var index_esm = {
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _vue = __webpack_require__(1);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _router = __webpack_require__(7);
+
+var _router2 = _interopRequireDefault(_router);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+    user: {
+        authenticated: false,
+        rol: null,
+        profile: null
+    },
+    check: function check() {
+        var _this = this;
+
+        if (localStorage.getItem('id_token') !== null) {
+            _vue2.default.http.get('api/user').then(function (response) {
+                _this.user.authenticated = true;
+                _this.user.profile = response.data.data;
+                _this.user.rol = response.data.data['rol'];
+            }, function (response) {
+                localStorage.removeItem('id_token');
+                _this.user.authenticated = false;
+                _this.user.profile = null;
+                _this.user.rol = null;
+                _router2.default.push('login');
+            });
+        } else {
+            _router2.default.push('login');
+        }
+    },
+    islogin: function islogin(to, from, next) {
+        if (localStorage.getItem('id_token') !== null) {
+            _vue2.default.http.get('api/user').then(function (response) {
+                _router2.default.push('inicio');
+            }, function (response) {
+                next();
+            });
+        } else {
+            next();
+        }
+    },
+    register: function register(context, name, email, password) {
+        _vue2.default.http.post('api/register', {
+            name: name,
+            email: email,
+            password: password
+        }).then(function (response) {
+            context.success = true;
+        }, function (response) {
+            context.response = response.data;
+            context.error = true;
+        });
+    },
+    signin: function signin(context, user, password) {
+        var _this2 = this;
+
+        _vue2.default.http.post('api/signin', {
+            name: user,
+            password: password
+        }).then(function (response) {
+            context.error = false;
+            localStorage.setItem('id_token', response.data.meta.token);
+            _vue2.default.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('id_token');
+            _this2.user.authenticated = true;
+            _this2.user.profile = response.data.data;
+            _this2.user.rol = response.data.data['rol'];
+            _router2.default.push('inicio');
+        }, function (response) {
+            context.error = true;
+        });
+    },
+    signout: function signout() {
+        localStorage.removeItem('id_token');
+        this.user.authenticated = false;
+        this.user.profile = null;
+        this.user.rol = null;
+        _router2.default.push('login');
+    }
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(0)(
+  /* script */
+  __webpack_require__(22),
+  /* template */
+  __webpack_require__(63),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "D:\\proyectos\\appLaravel\\resources\\assets\\components\\Navbar.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] Navbar.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-fb383640", Component.options)
+  } else {
+    hotAPI.reload("data-v-fb383640", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10849,7 +10849,7 @@ var _vueResource = __webpack_require__(64);
 
 var _vueResource2 = _interopRequireDefault(_vueResource);
 
-var _auth = __webpack_require__(2);
+var _auth = __webpack_require__(3);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -11265,11 +11265,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(3);
+var _Navbar = __webpack_require__(4);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11311,7 +11311,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _auth = __webpack_require__(2);
+var _auth = __webpack_require__(3);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -11360,7 +11360,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 //
 //
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
 exports.default = {
   computed: _extends({}, (0, _vuex.mapGetters)({
@@ -11391,7 +11391,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
 var _sweetalert = __webpack_require__(36);
 
@@ -11492,9 +11492,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
-var _Navbar = __webpack_require__(3);
+var _Navbar = __webpack_require__(4);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11647,7 +11647,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(3);
+var _Navbar = __webpack_require__(4);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11728,8 +11728,15 @@ exports.default = {
 
 
 Object.defineProperty(exports, "__esModule", {
-   value: true
+    value: true
 });
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -11755,8 +11762,21 @@ Object.defineProperty(exports, "__esModule", {
 //
 
 exports.default = {
-   name: 'FormCliente',
-   props: ['user']
+    name: 'FormCliente',
+    props: ['user'],
+    methods: {
+        showHide: function showHide() {
+            if ($("#showhide").data('val') == "1") {
+                $("#inputPassword").prop('type', 'text');
+                $("#eye").attr("class", "glyphicon glyphicon-eye-close");
+                $("#showhide").data('val', '0');
+            } else {
+                $("#inputPassword").prop('type', 'password');
+                $("#eye").attr("class", "glyphicon glyphicon-eye-open");
+                $("#showhide").data('val', '1');
+            }
+        }
+    }
 };
 
 /***/ }),
@@ -11770,7 +11790,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Navbar = __webpack_require__(3);
+var _Navbar = __webpack_require__(4);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -11920,7 +11940,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _auth = __webpack_require__(2);
+var _auth = __webpack_require__(3);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -12075,7 +12095,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _auth = __webpack_require__(2);
+var _auth = __webpack_require__(3);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -12148,7 +12168,7 @@ var _Cart = __webpack_require__(39);
 
 var _Cart2 = _interopRequireDefault(_Cart);
 
-var _Navbar = __webpack_require__(3);
+var _Navbar = __webpack_require__(4);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
@@ -12180,7 +12200,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
 exports.default = {
   computed: (0, _vuex.mapGetters)({
@@ -12215,7 +12235,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _auth = __webpack_require__(2);
+var _auth = __webpack_require__(3);
 
 var _auth2 = _interopRequireDefault(_auth);
 
@@ -12588,6 +12608,7 @@ var mutations = (_mutations = {}, _defineProperty(_mutations, types.USER_SELECTE
   var client = _ref6.client;
 
   state.userSelected = client;
+  state.addStatus = null;
 }), _defineProperty(_mutations, types.RECEIVE_CLIENTS, function (state, _ref7) {
   var clients = _ref7.clients;
 
@@ -12705,7 +12726,7 @@ var _vue = __webpack_require__(1);
 
 var _vue2 = _interopRequireDefault(_vue);
 
-var _vuex = __webpack_require__(4);
+var _vuex = __webpack_require__(2);
 
 var _vuex2 = _interopRequireDefault(_vuex);
 
@@ -14864,7 +14885,12 @@ module.exports = Component.exports
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('form', {
-    staticClass: "form-horizontal"
+    staticClass: "form-horizontal",
+    on: {
+      "submit": function($event) {
+        $event.preventDefault();
+      }
+    }
   }, [_c('input', {
     attrs: {
       "type": "hidden",
@@ -14912,9 +14938,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     domProps: {
       "value": _vm.user.email
     }
-  })])]), _vm._v(" "), _vm._m(0)])
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
+  })])]), _vm._v(" "), _c('div', {
     staticClass: "form-group"
   }, [_c('label', {
     staticClass: "col-sm-4 control-label",
@@ -14924,16 +14948,38 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_vm._v("Password")]), _vm._v(" "), _c('div', {
     staticClass: "col-sm-8"
+  }, [_c('div', {
+    staticClass: "input-group"
   }, [_c('input', {
     staticClass: "form-control",
     attrs: {
       "type": "password",
-      "value": "",
       "id": "inputPassword",
       "placeholder": "Password"
+    },
+    domProps: {
+      "value": _vm.user.password
     }
-  })])])
-}]}
+  }), _vm._v(" "), _c('span', {
+    staticClass: "input-group-btn"
+  }, [_c('button', {
+    staticClass: "btn btn-default btn-md",
+    attrs: {
+      "id": "showhide",
+      "data-val": "1"
+    },
+    on: {
+      "click": function($event) {
+        _vm.showHide()
+      }
+    }
+  }, [_c('span', {
+    staticClass: "glyphicon glyphicon-eye-open",
+    attrs: {
+      "id": "eye"
+    }
+  })])])])])])])
+},staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
@@ -14988,13 +15034,19 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     directives: [{
       name: "show",
       rawName: "v-show",
-      value: (_vm.showForm),
-      expression: "showForm"
+      value: (_vm.addStatus == null),
+      expression: "addStatus == null"
     }],
     attrs: {
       "user": _vm.userSelected
     }
   }), _vm._v(" "), _c('p', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.addStatus == null),
+      expression: "addStatus == null"
+    }],
     attrs: {
       "id": "mensajesError"
     }
@@ -15002,8 +15054,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     directives: [{
       name: "show",
       rawName: "v-show",
-      value: (!_vm.showForm),
-      expression: "!showForm"
+      value: (_vm.addStatus != null),
+      expression: "addStatus != null"
     }],
     attrs: {
       "id": "mensajes"
@@ -15020,8 +15072,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     directives: [{
       name: "show",
       rawName: "v-show",
-      value: (_vm.showForm),
-      expression: "showForm"
+      value: (_vm.addStatus == null),
+      expression: "addStatus == null"
     }],
     staticClass: "btn btn-primary",
     attrs: {

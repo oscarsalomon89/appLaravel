@@ -16,13 +16,13 @@
         <h4 class="modal-title" id="myModalLabel">{{titulo}}</h4>
       </div>
       <div class="modal-body">
-        <FormCliente v-show="showForm" :user="userSelected"></FormCliente>
-        <p id="mensajesError"></p>
-        <p v-show="!showForm" id="mensajes">{{ addStatus }}</p>
+        <FormCliente v-show="addStatus == null" :user="userSelected"></FormCliente>
+        <p v-show="addStatus == null" id="mensajesError"></p>
+        <p v-show="addStatus != null" id="mensajes">{{ addStatus }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" v-show="showForm" @click="addUser()" class="btn btn-primary">Save changes</button>
+        <button type="button" v-show="addStatus == null" @click="addUser()" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
