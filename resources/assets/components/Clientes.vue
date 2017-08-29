@@ -13,11 +13,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">{{titulo}}</h4>
+        <h4 class="modal-title" id="myModalLabel"></h4>
       </div>
       <div class="modal-body">
         <FormCliente v-show="addStatus == null" :user="userSelected"></FormCliente>
-        <p v-show="addStatus == null" id="mensajesError"></p>
+        <p id="mensajesError">{{ addFailure }}</p>
         <p v-show="addStatus != null" id="mensajes">{{ addStatus }}</p>
       </div>
       <div class="modal-footer">
@@ -59,6 +59,7 @@
       computed: mapGetters({
         listUsers: 'allClients',
         addStatus: 'addStatus',
+        addFailure: 'addFailure',
         userSelected: 'userSelected'
       }),
       data() {
@@ -74,11 +75,10 @@
       openAddUser(){
         this.showForm = true;
         this.$store.dispatch('selectClient',[]);
-        document.getElementById('mensajesError').innerHTML = '';
-        /*document.getElementById('iduser').value = 0;
-        document.getElementById('inputUser').value = '';
-        document.getElementById('inputEmail').value = '';
-        document.getElementById('inputPassword').value = '';*/
+        this.$store.dispatch('failMensaje', '');
+        //document.getElementById('mensajesError').innerHTML = '';
+        document.getElementById('inputPassword').value = '';
+        document.getElementById('myModalLabel').innerHTML = 'Nuevo Usuario';
 
         $('#myModal').modal('show');
       },
@@ -89,8 +89,9 @@
           var email = document.getElementById('inputEmail').value;
           var pass = document.getElementById('inputPassword').value;          
 
-          if (email === '' || user==='' || pass == '') {
-            document.getElementById('mensajesError').innerHTML = 'Datos incompletos';
+          if (email == '' || user =='' || pass == '') {
+            var msgError = 'Datos incompletos';
+            this.$store.dispatch('failMensaje', msgError)
           } else {
             var data = {
                 name: user,
@@ -106,7 +107,7 @@
                 this.$store.dispatch('addClient', data)
                     .then(function(res){
                         vm.showForm = false;//oculta el form
-                        document.getElementById('mensajesError').innerHTML = '';
+                        //document.getElementById('mensajesError').innerHTML = '';
                         //if (res.status == 422){
                           //  document.getElementById('mensajes').innerHTML = response.body.email[0];
                         //}else{

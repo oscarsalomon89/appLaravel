@@ -17,7 +17,7 @@
         <label for="inputPassword" value="" class="col-sm-4 control-label">Password</label>
         <div class="col-sm-8">
             <div class="input-group">
-                <input type="password" v-bind:value="user.password" class="form-control" id="inputPassword" placeholder="Password">
+                <input type="password" class="form-control" id="inputPassword" placeholder="Password">
                 <span class="input-group-btn">
                     <button v-on:click="showHide()" class="btn btn-default btn-md" id="showhide" data-val='1'>
                         <span id='eye' class="glyphicon glyphicon-eye-open"></span>

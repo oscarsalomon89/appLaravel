@@ -5,14 +5,16 @@ import * as types from '../mutation-types'
 const state = {
   all: [],
   userSelected: [],
-  addStatus: null
+  addStatus: null,
+  addFailure: null
 }
 
 // getters
 const getters = {
   allClients: state => state.all,
   addStatus: state => state.addStatus,
-  userSelected: state => state.userSelected
+  userSelected: state => state.userSelected,
+  addFailure: state => state.addFailure,
 }
 
 // actions
@@ -27,7 +29,7 @@ const actions = {
     clients.addClient(
       data,
       client => { commit(types.ADD_SUCCESS, { client })},
-      () => commit(types.ADD_FAILURE)
+      msgs => {commit(types.ADD_FAILURE, {msgs})}
     )
   },
 
@@ -41,6 +43,10 @@ const actions = {
       () => commit(types.UPDATE_SUCCESS),
       () => commit(types.UPDATE_FAILURE)
     )
+  },
+
+  failMensaje ({ commit }, msgs) {
+    commit(types.ADD_FAILURE, { msgs })
   },
 
   deleteClient ({ commit }, data) {
@@ -72,9 +78,9 @@ const mutations = {
     state.addStatus = 'El cliente se elimino correctamente'
   },
 
-  [types.ADD_FAILURE] (state, { savedCartItems }) {
+  [types.ADD_FAILURE] (state, { msgs }) {
     // rollback to the cart saved before sending the request
-    state.addStatus = 'No se pudo agregar el cliente'
+    state.addFailure = msgs
   },
 
   [types.UPDATE_FAILURE] (state) {

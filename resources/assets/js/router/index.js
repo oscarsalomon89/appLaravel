@@ -11,6 +11,7 @@ import Pedidos    from '../../components/Pedidos.vue'
 import Login      from '../../components/Login.vue'
 import Register     from '../../components/Register.vue'
 import Clientes   from '../../components/Clientes.vue'
+import FileUpload   from '../../components/FileUpload.vue'
 
 Vue.use(Router)
 Vue.use(VueResource)
@@ -37,6 +38,11 @@ export default new Router({
       path: '/productos',
       name: 'Products',
       component: About
+    },
+    {
+      path: '/fotos',
+      name: 'Fotos',
+      component: FileUpload
     },
     {
       path: '/login',

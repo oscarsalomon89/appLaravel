@@ -41,3 +41,5 @@ Route::get('/api/users','UserController@getUsers');
 Route::get('/api/products','ProductController@getProducts');
 Route::post('/api/deleteUser','UserController@deleteUser');
 Route::post('/api/updateUser','UserController@updateUser');
+
+Route::post('/api/upload', 'FilesController@upload');

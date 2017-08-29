@@ -64,19 +64,14 @@ import swal from 'sweetalert2'
                     title: 'Exito!',
                     html: 'Cliente eliminado'
                 })
-                })
-
-            
+                })            
         },
         editarUsuario(user){            
             this.showForm = true;
-            this.titulo = 'Editar Usuario';
             this.$store.dispatch('selectClient',user);
-            document.getElementById('mensajesError').innerHTML = '';
-            /*document.getElementById('iduser').value = user.id;
-            document.getElementById('inputUser').value = user.name;
-            document.getElementById('inputEmail').value = user.email;
-            document.getElementById('inputPassword').value = '';*/
+            this.$store.dispatch('failMensaje', '');
+            document.getElementById('myModalLabel').innerHTML = 'Editar Usuario';
+            document.getElementById('inputPassword').value = '';
 
             $('#myModal').modal('show');
         },

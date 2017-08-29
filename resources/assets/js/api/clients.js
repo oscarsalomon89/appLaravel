@@ -14,11 +14,11 @@ export default {
     Vue.http.post('api/register', data)
         .then(function(res){
             cb(res.body.user)             
-            }, function(response){
-            if (response.status ==422){
-                errorCb()
-            }
-        })
+            }, function(response){                
+                if (response.status ==422){
+                    errorCb(response.body.email[0])
+                }
+            })
   },
 
   updateClient (data, cb, errorCb) {

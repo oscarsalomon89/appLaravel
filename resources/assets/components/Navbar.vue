@@ -16,6 +16,7 @@
                 <li v-if="auth.user.rol == 1" id="navCli"><router-link to="/clientes">Clientes</router-link></li>
                 <li id="navAbout"><router-link to="/productos">Productos</router-link></li>
                 <li id="navContact"><router-link to="/pedidos">Pedidos</router-link></li>
+                <li id="navContact"><router-link to="/fotos">Fotos</router-link></li>
                 <li id="navContact"><router-link to="/consultas">Consultas</router-link></li>
               </ul>
               <ul class="nav navbar-nav navbar-right" v-if="auth.user.authenticated">
