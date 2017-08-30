@@ -36,6 +36,7 @@ Route::get('/login','HomeController@index');
 Route::get('/signup','HomeController@index');
 Route::get('/about','HomeController@index');
 Route::get('/pedidos','HomeController@index');
+Route::get('/fotos','HomeController@index');
 
 Route::get('/api/users','UserController@getUsers');
 Route::get('/api/products','ProductController@getProducts');
